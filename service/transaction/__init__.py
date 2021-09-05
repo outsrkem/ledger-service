@@ -4,6 +4,7 @@ def statistical_trim(data=list()):
     # data 固定内容如下
     # data = [{"amount_total": "10000005.0000", "money_title": "餐饮", "money_type": 1001, "record_period": "2021-10"}]
     response = dict()
+    row_list = list()
     if data:
         details, period, row = list(), '', dict()
         for i in data:
@@ -13,5 +14,6 @@ def statistical_trim(data=list()):
 
         for i in details:
             row[i["money_type"]] = i["amount_total"]
-        response["details"], response["period"], response["row"] = details, period, row
+        row_list.append(row)
+        response["details"], response["period"], response["rows"] = details, period, row_list
     return response

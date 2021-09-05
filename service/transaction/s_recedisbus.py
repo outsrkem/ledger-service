@@ -10,7 +10,9 @@ from service.utility import now_time_timestamp
 
 def daily_statistical(y, m, d):
     result = RecedisbuStatement().find_by_income_and_daily_statistical(y, m, d)
-    response = statistical_trim(result)
+    res = statistical_trim(result)
+    response = dict()
+    response["items"] = res
     if response:
         return response_body(200, '', response)
     return response_body(404, 'The query is empty!')
@@ -18,7 +20,9 @@ def daily_statistical(y, m, d):
 
 def monthly_statistical(y, m):
     result = RecedisbuStatement().find_by_income_and_monthly_statistical(y, m)
-    response = statistical_trim(result)
+    res = statistical_trim(result)
+    response = dict()
+    response["items"] = res
     if response:
         return response_body(200, '', response)
     return response_body(404, 'The query is empty!')
@@ -26,7 +30,9 @@ def monthly_statistical(y, m):
 
 def annual_statistical(y):
     result = RecedisbuStatement().find_by_income_and_annual_statistical(y)
-    response = statistical_trim(result)
+    res = statistical_trim(result)
+    response = dict()
+    response["items"] = res
     if response:
         return response_body(200, '', response)
     return response_body(404, 'The query is empty!')

@@ -76,6 +76,24 @@ def create_ledger_recedisbu_statement():
     ''')
 
 
+def create_ledger_menus():
+    db.session.execute('''
+    CREATE TABLE IF NOT EXISTS `ledger_menus` (
+      `id` int(11) NOT NULL AUTO_INCREMENT,
+      `name` char(255) NOT NULL,
+      `paths` varchar(255) DEFAULT NULL COMMENT '请求路径',
+      `m_code` varchar(255) DEFAULT NULL COMMENT '权限码',
+      `parent_menu_id` int(11) NOT NULL DEFAULT 0 COMMENT '父菜单id',
+      `m_level` int(255) NOT NULL DEFAULT 1 COMMENT '菜单级别。1、2、3',
+      `seq_sort` int(11) NOT NULL COMMENT '菜单顺序',
+      `icon_name` varchar(255) DEFAULT '',
+      `describes` varchar(255) DEFAULT '',
+      `create_time` bigint(19) DEFAULT 1000000000000,
+      `update_time` bigint(19) DEFAULT 1000000000000,
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB AUTO_INCREMENT=2001 DEFAULT CHARSET=utf8 COMMENT='菜单表';
+    ''')
+
 def initialize_sql():
     create_ledger_user()
     create_ledger_role()

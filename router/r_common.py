@@ -1,8 +1,17 @@
 # -*- coding=utf-8 -*-
 from flask import Blueprint, request, json, session
+
+from service.common.s_menus import query_layout_menus
 from service.common.s_money_type import add_deal_type, del_deal_type, update_deal_type, query_all_money_type
 
 common = Blueprint('common', __name__)
+
+
+@common.route("/layout/menus", methods=['GET'])
+def r_layout_menus():
+    # 首页菜单
+    row = query_layout_menus()
+    return row, row["meta_info"]["res_code"]
 
 
 @common.route("/user/register", methods=['POST'])
