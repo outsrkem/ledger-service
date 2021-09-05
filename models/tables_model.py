@@ -95,11 +95,13 @@ def create_ledger_menus():
     ) ENGINE=InnoDB AUTO_INCREMENT=2001 DEFAULT CHARSET=utf8 COMMENT='菜单表';
     ''')
 
+
 def initialize_sql():
     create_ledger_user()
     create_ledger_role()
     create_ledger_money_type()
     create_ledger_recedisbu_statement()
+    create_ledger_menus()
     return True
 
 
