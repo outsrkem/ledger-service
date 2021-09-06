@@ -13,7 +13,7 @@ def statistical_trim(data=list()):
         details, period, row = list(), '', dict()
         for i in data:
             amount_total.append(i["amount_total"])
-            i["amount_total"] = str(i["amount_total"])
+            i["amount_total"] = str(i["amount_total"].quantize(Decimal('0.000')))
             period = i["record_period"]
             details.append(i)
 
@@ -23,7 +23,8 @@ def statistical_trim(data=list()):
 
         for i in amount_total:  # 计算总金额
             amount_sum = amount_sum + i
-        amount_sum = amount_sum.quantize(Decimal('0.000'))  # 四舍五入，保留3位小数
+        '''四舍五入，保留3位小数，实际计算按4位精度'''
+        amount_sum = amount_sum.quantize(Decimal('0.000'))
 
         response["details"], response["period"], response["rows"], response["amount_sum"] = \
             details, period, rows, str(amount_sum)
