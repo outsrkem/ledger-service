@@ -2,7 +2,7 @@
 from urllib import request
 from flask import Flask, request, session, current_app
 from flask_sqlalchemy import SQLAlchemy
-from service.common import response_body
+from service import response_body
 from settings import config
 import time
 
@@ -31,9 +31,9 @@ def before():
     url = request.path
     pass_list = [
         '/',
-        '/api/v1/common/user/login',
-        '/api/v1/common/user/logout',
-        '/api/v1/common/user/register',
+        '/api/v1/ledger/common/user/login',
+        '/api/v1/ledger/common/user/logout',
+        '/api/v1/ledger/common/user/register',
     ]
     if url not in pass_list:
         if not session.get('islogin'):

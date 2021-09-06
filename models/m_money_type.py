@@ -40,17 +40,20 @@ class MoneyType(dbmodel):
             return True
         except Exception as e:
             dbsession.rollback()
+            print(e)
             return False
 
     @staticmethod
-    def del_money_type(type_id):
+    def del_money_type(raws):
         # 删除
         try:
-            dbsession.query(MoneyType).filter_by(id=type_id).delete()
+            for type_id in raws["type_id"]:
+                dbsession.query(MoneyType).filter_by(id=type_id).delete()
             dbsession.commit()
             return True
         except Exception as e:
             dbsession.rollback()
+            print(e)
             return False
 
     @staticmethod
@@ -58,6 +61,9 @@ class MoneyType(dbmodel):
         # 更新
         try:
             row = dbsession.query(MoneyType).filter_by(id=raw["type_id"]).first()
+            if not row:
+                print("Type does not exist, type_id: " + str(raw["type_id"]))
+                return False
             row.title = raw["title"]
             row.status = raw["status"]
             row.describes = raw["describes"]
@@ -66,4 +72,5 @@ class MoneyType(dbmodel):
             return True
         except Exception as e:
             dbsession.rollback()
+            print(e)
             return False

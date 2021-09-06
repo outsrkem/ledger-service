@@ -10,5 +10,5 @@ def reg_blueprint(app):
     :param app:
     """
     app.register_blueprint(root, url_prefix='/')
-    app.register_blueprint(comm, url_prefix='/api/v1/common')
-    app.register_blueprint(recedisbu, url_prefix='/api/v1/recedisbu')
+    app.register_blueprint(comm, url_prefix='/api/v1/ledger/common')
+    app.register_blueprint(recedisbu, url_prefix='/api/v1/ledger/recedisbu')

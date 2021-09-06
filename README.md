@@ -3,35 +3,40 @@
 #### ledger: 账单
 
 ### api
+- 注册
 ```
-# 注册
-POST /api/v1/common/user/register
+POST /api/v1/ledger/common/user/register
 {
     "username": "admin",
     "password": "123456",
     "mobile": "12345214",
     "describes":""
 }
-
-# 登录
-POST /api/v1/common/user/login
+```
+- 登录
+```
+POST /api/v1/ledger/common/user/login
 {
     "account": "admin",
     "password": "123456"
 }
-
-# 登出
-POST /api/v1/common/user/logout
-
+```
+- 登出
+```
+POST /api/v1/ledger/common/user/logout
+```
+- 统计
+```
 # 日统计
-GET /api/v1/recedisbu/statistical/daily?y=2021&m=10&d=2
+GET /api/v1/ledger/recedisbu/statistical/daily?y=2021&m=10&d=2
 # 月统计
-GET /api/v1/recedisbu/statistical/monthly?y=2021&m=10
+GET /api/v1/ledger/recedisbu/statistical/monthly?y=2021&m=10
 # 年统计
-GET /api/v1/recedisbu/statistical/annual?y=2021
-
-# 添加流水记录
-POST /api/v1/recedisbu/journal/account
+GET /api/v1/ledger/recedisbu/statistical/annual?y=2021
+```
+- 添加流水记录
+```
+POST /api/v1/ledger/recedisbu/journal/account
 {
     "raw_data": [
         {
@@ -49,13 +54,14 @@ POST /api/v1/recedisbu/journal/account
             "describes": "飞机"
         }
 }
-
-################
-# 查看交易类型
-GET /api/v1/common/deal/type
-
-# 添加交易类型
-POST   /api/v1/common/deal/type
+```
+- 查看交易类型
+```
+GET /api/v1/ledger/common/deal/type
+```
+- 添加交易类型
+```
+POST /api/v1/ledger/common/deal/type
 {
     "raw_data": [
         {
@@ -71,16 +77,26 @@ POST   /api/v1/common/deal/type
     ]
 }
 
-# 修改交易类型
-PATCH  /api/v1/common/deal/type
+```
+- 修改交易类型
+```
+PATCH /api/v1/ledger/common/deal/type
 {
     "type_id": 2004,
     "title": "香烟",
     "describes": "暂无ssssssss",
     "status": 2
 }
-
-# 删除交易类型
-DELETE /api/v1/common/deal/type?type_id=2004
+```
+- 删除交易类型
+```
+DELETE /api/v1/ledger/common/deal/type
+{
+    "type_id": [
+        1035,
+        1036,
+        1037
+    ]
+}
 ```
 

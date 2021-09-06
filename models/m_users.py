@@ -2,7 +2,7 @@
 
 from models import dbconnect
 from sqlalchemy import Table
-from service.utility import now_time_timestamp
+from service.utility import now_timestamp
 
 dbsession, dbmodel, metadata = dbconnect()
 
@@ -12,7 +12,7 @@ class Users(dbmodel):
 
     @staticmethod
     def user_register(username, passwd, mobile, describes):
-        now_time = now_time_timestamp()
+        now_time = now_timestamp()
         account = mobile
         # noinspection PyBroadException
         try:

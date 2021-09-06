@@ -58,7 +58,7 @@ def r_patch_deal_type():
 
 @common.route("/deal/type", methods=['DELETE'])
 def r_delet_deal_type():
-    # 删除交易类型
-    type_id = request.args.get('type_id')
-    row = del_deal_type(type_id)
+    # 删除交易类型，接收如下格式数据
+    # {"type_id":[1035,1036,1037]}
+    row = del_deal_type(request.get_json())
     return row, row["meta_info"]["res_code"]

@@ -3,9 +3,9 @@ from flask import session
 
 from models.m_money_type import MoneyType
 from models.m_recedisbu import RecedisbuStatement
-from service.common import response_body
+from service import response_body
 from service.transaction import statistical_trim
-from service.utility import now_time_timestamp
+from service.utility import now_timestamp
 
 
 def daily_statistical(y, m, d):
@@ -44,8 +44,8 @@ def add_journal_account(raw):
             return response_body(406, f'The mtid({i["mtid"]}) was not found!')
 
     raw["uid"] = session['user_id']
-    raw["create_time"] = now_time_timestamp()
-    raw["update_time"] = now_time_timestamp()
+    raw["create_time"] = now_timestamp()
+    raw["update_time"] = now_timestamp()
 
     if RecedisbuStatement().inst_journal_account(raw):
         return response_body(201)

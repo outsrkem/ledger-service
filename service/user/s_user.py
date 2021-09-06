@@ -1,7 +1,7 @@
 # -*- coding=utf-8 -*-
 from flask import session
 
-from service.common import response_body
+from service import response_body
 from werkzeug.security import check_password_hash, generate_password_hash
 from models.m_users import Users
 
@@ -35,5 +35,5 @@ def user_login(data):
                              "describes": result["describes"],
                              "update_time": result["update_time"], "status": result["status"], "token": ""}
 
-        return response_body(201, '', response_userinfo)
+        return response_body(200, '', response_userinfo)
     return response_body(403, 'Login Error')

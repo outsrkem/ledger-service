@@ -2,8 +2,8 @@
 from flask import session
 
 from models.m_money_type import MoneyType
-from service.common import response_body
-from service.utility import now_time_timestamp
+from service import response_body
+from service.utility import now_timestamp
 
 
 def query_all_money_type():
@@ -26,25 +26,26 @@ def add_deal_type(raw):
         if not deal_types:  # 查询大类是否存在
             return response_body(406, f'The category({i["category"]}) was not found!')
         elif deal_types["category"] != 1:
-            return response_body(406, f'The category({i["category"]}) was not found!')
+            '''category 为 1 ，则表示为大类'''
+            return response_body(406, f'A category id ({i["category"]}) is a subclass.')
 
     raw["uid"] = session['user_id']
-    raw["create_time"] = now_time_timestamp()
-    raw["update_time"] = now_time_timestamp()
+    raw["create_time"] = now_timestamp()
+    raw["update_time"] = now_timestamp()
     if MoneyType().inst_money_type(raw):
         return response_body(201)
 
     return response_body(500, 'Error')
 
 
-def del_deal_type(type_id):
-    if MoneyType().del_money_type(type_id):
+def del_deal_type(raws):
+    if MoneyType().del_money_type(raws):
         return response_body(200)
     return response_body(500, 'Error')
 
 
 def update_deal_type(raw):
-    raw["update_time"] = now_time_timestamp()
+    raw["update_time"] = now_timestamp()
     if MoneyType().update_money_type(raw):
         return response_body(201)
     return response_body(500, 'Error')

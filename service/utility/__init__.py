@@ -2,6 +2,6 @@
 import time
 
 
-def now_time_timestamp():
+def now_timestamp():
     _now_time = int(round(time.time() * 1000))
     return _now_time

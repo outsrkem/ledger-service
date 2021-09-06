@@ -2,7 +2,7 @@
 from flask import session
 
 from models.m_menus import Menus
-from service.common import response_body
+from service import response_body
 
 
 def query_layout_menus():
