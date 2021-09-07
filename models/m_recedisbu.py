@@ -77,3 +77,15 @@ class RecedisbuStatement(dbmodel):
             print(e)
             dbsession.rollback()
             return False
+
+    def find_by_all_month_record(self, y, m):
+        # 查询当月流水
+        result = dbsession.query(RecedisbuStatement).filter_by(occ_year=y, occ_month=m).group_by("occ_day").all()
+        result_list = list()
+        for row in result:
+            ww = {c.name: getattr(row, c.name) for c in self.__table__.columns}
+            result_list.append(ww)
+
+        if len(result) > 0:
+            return result_list
+        return False

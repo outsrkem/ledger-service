@@ -1,6 +1,6 @@
 # -*- coding=utf-8 -*-
 from flask import Blueprint, request, json
-from service.transaction.s_recedisbus import daily_statistical, add_journal_account
+from service.transaction.s_recedisbus import daily_statistical, add_journal_account, monthly_summarizing
 from service.transaction.s_recedisbus import monthly_statistical
 from service.transaction.s_recedisbus import annual_statistical
 
@@ -39,4 +39,12 @@ def r_annual_statistical():
 def r_add_journal_account():
     row = add_journal_account(json.loads(request.get_data()))
     # 添加一条或多条记账
+    return row, row["meta_info"]["res_code"]
+
+
+@recedisbu.route("/summarizing/monthly", methods=['GET'])
+def r_monthly_summarizing():
+    y = request.args.get('y')
+    m = request.args.get('m')
+    row = monthly_summarizing(y, m)
     return row, row["meta_info"]["res_code"]

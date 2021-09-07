@@ -99,4 +99,7 @@ DELETE /api/v1/ledger/common/deal/type
     ]
 }
 ```
-
+- 获取月账单
+```
+GET /api/v1/ledger/recedisbu/summarizing/monthly?y=2021&m=8
+```
