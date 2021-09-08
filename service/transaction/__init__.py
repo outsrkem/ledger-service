@@ -52,7 +52,6 @@ def statistical_type_decimal_to_str(data):
     :param data:
     :return: 原格式
     """
-    print(data)
     _data = dict()
     _details = list()
     _rows = list()

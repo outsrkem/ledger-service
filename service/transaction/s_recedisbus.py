@@ -62,7 +62,7 @@ def monthly_summarizing(y, m):
     period = y + "-" + m
     day_list = []
     rows = list()
-    money_type = dict()
+    money_type = list()
     _d_temporary = dict()
     amount_sum_list = list()
     amount_sum = Decimal()
@@ -70,8 +70,17 @@ def monthly_summarizing(y, m):
         if i["category_id"] != 1:
             '''只获取大类'''
             continue
-        money_type[str(i["id"])] = i["category"]
+        money_type.append({"id": str(i["id"]), "title": i["category"]})
         _d_temporary[str(i["id"])] = ""
+
+    if res is False:
+        '''当月没有记录'''
+        items["period"] = period
+        items["amount_sum"] = str(amount_sum)
+        items["money_type"] = money_type
+        payload = {"items": items}
+        msg = "There is no record of income and expenditure this month"
+        return response_body(200, msg, payload)
 
     for day in res:
         '''获取月的天,处理每天的数据'''
