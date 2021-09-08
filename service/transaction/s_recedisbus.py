@@ -7,6 +7,9 @@ from models.m_recedisbu import RecedisbuStatement
 from service import response_body
 from service.transaction import statistical_trim, formatting_type_decimal, statistical_type_decimal_to_str
 from service.utility import now_timestamp
+from settings import Logger
+
+_log = Logger()
 
 
 def daily_statistical(y, m, d):
@@ -72,14 +75,15 @@ def monthly_summarizing(y, m):
             continue
         money_type[str(i["id"])] = i["category"]
         _d_temporary[str(i["id"])] = ""
-
     if res is False:
         '''当月没有记录'''
         items["period"] = period
         items["amount_sum"] = str(amount_sum)
         items["money_type"] = money_type
+        items["rows"] = list()
         payload = {"items": items}
-        msg = "There is no record of income and expenditure this month"
+        msg = "There is no record of income and expenditure this month."
+        _log.logger.info(msg)
         return response_body(200, msg, payload)
 
     for day in res:
@@ -95,6 +99,7 @@ def monthly_summarizing(y, m):
         amount_sum_list.append(_d["amount"])
 
         rows.append(_d)
+    _log.logger.info("day_list: %s" % day_list)
 
     '''汇总'''
     for i in amount_sum_list:

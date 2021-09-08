@@ -1,9 +1,11 @@
 # -*- coding=utf-8 -*-
 from flask import session
-
 from models.m_money_type import MoneyType
 from service import response_body
 from service.utility import now_timestamp
+from settings import Logger
+
+_log = Logger()
 
 
 def query_all_money_type():
@@ -16,7 +18,11 @@ def query_all_money_type():
             i["alias"] = i["category"] + '-' + i["title"]
         response.append(i)
     if response:
-        return response_body(200, '', response)
+        payload = {"items": response}
+        _log.logger.debug("Querying transaction Type. %s" % response)
+        _log.logger.info("Querying transaction Type.")
+        return response_body(200, '', payload)
+    _log.logger.warning("Querying transaction Type. The query is empty.")
     return response_body(404, 'The query is empty!')
 
 

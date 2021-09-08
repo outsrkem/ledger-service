@@ -1,5 +1,7 @@
 import os
 
+from settings import LOG_DIR, LOG_FILE_NAME
+
 '''
 在项目目录里执行命令启动应用
 gunicorn -c gunicorn_config.py main:app
@@ -7,7 +9,6 @@ gunicorn -c gunicorn_config.py main:app
 
 # 获取工作目录
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-LOG_DIR = os.path.join(BASE_DIR, "logs")
 RUN_DIR = os.path.join(BASE_DIR, "run")
 
 if not os.path.exists(LOG_DIR):
@@ -34,9 +35,9 @@ chdir = BASE_DIR
 pidfile = os.path.join(RUN_DIR, "ledger.pid")
 
 # 日志级别，这个日志级别指的是错误日志的级别，而访问日志的级别无法设置
-loglevel = 'debug'
+loglevel = 'info'
 access_log_format = '%(t)s %(p)s %(h)s "%(r)s" %(s)s %(L)s %(b)s %(f)s" "%(a)s"'
 
 # 日志
 accesslog = os.path.join(LOG_DIR, "access.log")
-errorlog = '-'  # 记录到标准输出
+errorlog = os.path.join(LOG_DIR, LOG_FILE_NAME)
