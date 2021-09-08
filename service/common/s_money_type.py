@@ -49,3 +49,16 @@ def update_deal_type(raw):
     if MoneyType().update_money_type(raw):
         return response_body(201)
     return response_body(500, 'Error')
+
+
+def deal_title_typ():
+    # 获取类别（只获取大类）
+    res_money_type = MoneyType().find_by_all_money_type()
+    money_type = list()
+    for i in res_money_type:
+        if i["category_id"] != 1:
+            '''只获取大类'''
+            continue
+        money_type.append({"id": str(i["id"]), "title": i["category"]})
+    payload = {"items": money_type}
+    return response_body(200, None, payload)

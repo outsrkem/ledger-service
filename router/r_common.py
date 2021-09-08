@@ -3,6 +3,7 @@ from flask import Blueprint, request, json, session
 
 from service.common.s_menus import query_layout_menus
 from service.common.s_money_type import add_deal_type, del_deal_type, update_deal_type, query_all_money_type
+from service.common.s_money_type import deal_title_typ
 
 common = Blueprint('common', __name__)
 
@@ -61,4 +62,10 @@ def r_delet_deal_type():
     # 删除交易类型，接收如下格式数据
     # {"type_id":[1035,1036,1037]}
     row = del_deal_type(request.get_json())
+    return row, row["meta_info"]["res_code"]
+
+
+@common.route("/deal/title/type", methods=['GET'])
+def r_deal_title_typ():
+    row = deal_title_typ()
     return row, row["meta_info"]["res_code"]

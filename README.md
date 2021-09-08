@@ -3,7 +3,9 @@
 #### ledger: 账单
 
 ### api
+
 - 注册
+
 ```
 POST /api/v1/ledger/common/user/register
 {
@@ -13,7 +15,9 @@ POST /api/v1/ledger/common/user/register
     "describes":""
 }
 ```
+
 - 登录
+
 ```
 POST /api/v1/ledger/common/user/login
 {
@@ -21,11 +25,15 @@ POST /api/v1/ledger/common/user/login
     "password": "123456"
 }
 ```
+
 - 登出
+
 ```
 POST /api/v1/ledger/common/user/logout
 ```
+
 - 统计
+
 ```
 # 日统计
 GET /api/v1/ledger/recedisbu/statistical/daily?y=2021&m=10&d=2
@@ -34,7 +42,9 @@ GET /api/v1/ledger/recedisbu/statistical/monthly?y=2021&m=10
 # 年统计
 GET /api/v1/ledger/recedisbu/statistical/annual?y=2021
 ```
+
 - 添加流水记录
+
 ```
 POST /api/v1/ledger/recedisbu/journal/account
 {
@@ -55,11 +65,15 @@ POST /api/v1/ledger/recedisbu/journal/account
         }
 }
 ```
+
 - 查看交易类型
+
 ```
 GET /api/v1/ledger/common/deal/type
 ```
+
 - 添加交易类型
+
 ```
 POST /api/v1/ledger/common/deal/type
 {
@@ -78,7 +92,9 @@ POST /api/v1/ledger/common/deal/type
 }
 
 ```
+
 - 修改交易类型
+
 ```
 PATCH /api/v1/ledger/common/deal/type
 {
@@ -88,7 +104,9 @@ PATCH /api/v1/ledger/common/deal/type
     "status": 2
 }
 ```
+
 - 删除交易类型
+
 ```
 DELETE /api/v1/ledger/common/deal/type
 {
@@ -99,7 +117,16 @@ DELETE /api/v1/ledger/common/deal/type
     ]
 }
 ```
+
 - 获取月账单
+
 ```
 GET /api/v1/ledger/recedisbu/summarizing/monthly?y=2021&m=8
 ```
+
+- 只获取大类别的名称和id，用于表格的渲染
+
+```
+GET /api/v1/ledger/common/deal/title/type
+```
+
