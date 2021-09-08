@@ -62,7 +62,7 @@ def monthly_summarizing(y, m):
     period = y + "-" + m
     day_list = []
     rows = list()
-    money_type = list()
+    money_type = dict()
     _d_temporary = dict()
     amount_sum_list = list()
     amount_sum = Decimal()
@@ -70,7 +70,7 @@ def monthly_summarizing(y, m):
         if i["category_id"] != 1:
             '''只获取大类'''
             continue
-        money_type.append({"id": str(i["id"]), "title": i["category"]})
+        money_type[str(i["id"])] = i["category"]
         _d_temporary[str(i["id"])] = ""
 
     if res is False:
