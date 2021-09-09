@@ -118,15 +118,20 @@ DELETE /api/v1/ledger/common/deal/type
 }
 ```
 
-- 获取月账单
-
-```
-GET /api/v1/ledger/recedisbu/summarizing/monthly?y=2021&m=8
-```
-
 - 只获取大类别的名称和id，用于表格的渲染
 
 ```
 GET /api/v1/ledger/common/deal/title/type
 ```
 
+- 获取月账单
+
+```
+GET /api/v1/ledger/recedisbu/summarizing/monthly?y=2021&m=8
+```
+
+- 获取年账单
+
+```
+GET /api/v1/ledger/recedisbu/summarizing/annual?y=2021
+```

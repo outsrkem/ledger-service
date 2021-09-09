@@ -89,3 +89,15 @@ class RecedisbuStatement(dbmodel):
         if len(result) > 0:
             return result_list
         return False
+
+    def find_by_all_annual_record(self, y):
+        # 查询当年流水
+        result = dbsession.query(RecedisbuStatement).filter_by(occ_year=y).group_by("occ_month").all()
+        result_list = list()
+        for row in result:
+            ww = {c.name: getattr(row, c.name) for c in self.__table__.columns}
+            result_list.append(ww)
+
+        if len(result) > 0:
+            return result_list
+        return False
