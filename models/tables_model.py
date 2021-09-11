@@ -1,5 +1,5 @@
 # -*- coding=utf-8 -*-
-from app_fiask import db
+from app_flask import db
 
 
 def create_ledger_user():

@@ -3,7 +3,7 @@ from sqlalchemy import MetaData
 
 
 def dbconnect():
-    from app_fiask import db
+    from app_flask import db
     db.get_engine()
     dbsession = db.session
     dbmodel = db.Model

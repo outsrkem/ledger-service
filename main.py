@@ -1,6 +1,6 @@
 # -*- coding=utf-8 -*-
 import os
-from app_fiask import init_app
+from app_flask import init_app
 from router import reg_blueprint
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
