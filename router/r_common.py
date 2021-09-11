@@ -2,8 +2,9 @@
 from flask import Blueprint, request, json, session
 
 from service.common.s_menus import query_layout_menus
-from service.common.s_money_type import add_deal_type, del_deal_type, update_deal_type, query_all_money_type
-from service.common.s_money_type import deal_title_typ
+from service.common.s_money_type import add_deal_type, del_deal_type, update_deal_type, query_all_money_type, \
+    query_money_type
+from service.common.s_money_type import deal_title_type
 
 common = Blueprint('common', __name__)
 
@@ -39,8 +40,13 @@ def r_user_logout():
 
 @common.route("/deal/type", methods=['GET'])
 def r_query_all_money_type():
-    row = query_all_money_type()
-    return row, row["meta_info"]["res_code"]
+    type_id = request.args.get('type_id')
+    if type_id is not None:
+        row = query_money_type(type_id)
+        return row, row["meta_info"]["res_code"]
+    else:
+        row = query_all_money_type()
+        return row, row["meta_info"]["res_code"]
 
 
 @common.route("/deal/type", methods=['POST'])
@@ -67,5 +73,5 @@ def r_delet_deal_type():
 
 @common.route("/deal/title/type", methods=['GET'])
 def r_deal_title_typ():
-    row = deal_title_typ()
+    row = deal_title_type()
     return row, row["meta_info"]["res_code"]

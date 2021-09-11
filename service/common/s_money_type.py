@@ -8,6 +8,15 @@ from settings import Logger
 _log = Logger()
 
 
+def query_money_type(type_id):
+    res = MoneyType().find_by_money_type(type_id)
+    if res:
+        payload = {"items": res}
+        return response_body(200, None, payload)
+    _log.logger.warning("The money type query is empty! type_id: %s" % type_id)
+    return response_body(404, 'The query is empty!')
+
+
 def query_all_money_type():
     res = MoneyType().find_by_all_money_type()
     response = list()
@@ -57,7 +66,7 @@ def update_deal_type(raw):
     return response_body(500, 'Error')
 
 
-def deal_title_typ():
+def deal_title_type():
     # 获取类别（只获取大类）
     res_money_type = MoneyType().find_by_all_money_type()
     money_type = list()
