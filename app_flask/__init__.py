@@ -32,7 +32,6 @@ def before():
     pass_list = [
         '/',
         '/api/v1/ledger/common/user/login',
-        '/api/v1/ledger/common/user/logout',
         '/api/v1/ledger/common/user/register',
     ]
     if url not in pass_list:
