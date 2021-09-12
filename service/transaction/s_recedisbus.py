@@ -43,8 +43,17 @@ def annual_statistical(y):
 
 
 def add_journal_account(raw):
+    field_keys = ['occ_date', 'mtid', 'amount', 'total']
     for i in raw["raw_data"]:
-        if not MoneyType().find_by_money_type(i["mtid"]):  # 查询类别是否存在
+        for field_key in field_keys:
+            """判断必选参数是否存在"""
+            if field_key not in i:
+                msg = 'The key field does not exist. key: %s' % field_key
+                _log.logger.warning(msg)
+                return response_body(400, msg)
+
+        if not MoneyType().find_by_money_type(i["mtid"]):
+            """查询类别是否存在"""
             return response_body(406, f'The mtid({i["mtid"]}) was not found!')
 
     raw["uid"] = session['user_id']
@@ -52,9 +61,11 @@ def add_journal_account(raw):
     raw["update_time"] = now_timestamp()
 
     if RecedisbuStatement().inst_journal_account(raw):
-        return response_body(201)
+        msg = 'Expense record added successfully.'
+        _log.logger.info("%s data=%s" % (msg, raw))
+        return response_body(201, msg)
 
-    return response_body(500, 'Error!')
+    return response_body(500, 'Failed to add expenditure record.')
 
 
 def monthly_summarizing(y, m):
