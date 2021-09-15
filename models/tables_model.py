@@ -2,6 +2,22 @@
 from app_flask import db
 
 
+def create_ledger_options():
+    # 配置表
+    db.session.execute('''
+    CREATE TABLE IF NOT EXISTS `ledger_options` (
+      `id` int(11) NOT NULL AUTO_INCREMENT,
+      `uid` int(11) NOT NULL DEFAULT 0 COMMENT '0: 系统内置',
+      `name` varchar(32) NOT NULL ,
+      `title` varchar(32) DEFAULT '',
+      `value` text,
+      `options_type` varchar(32) DEFAULT '' COMMENT '用于标识一组资源',
+      `describes` varchar(255) DEFAULT NULL,
+      PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB AUTO_INCREMENT=1001 DEFAULT CHARSET=utf8 COMMENT='配置表';
+    ''')
+
+
 def create_ledger_user():
     # 用户表
     db.session.execute('''
@@ -141,6 +157,7 @@ def create_ledger_menus():
 
 
 def initialize_sql():
+    create_ledger_options()
     create_ledger_user()
     create_ledger_role()
     create_ledger_permissions()
