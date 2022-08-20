@@ -6,7 +6,7 @@ from logging import handlers
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 # db
-DB_HOST = "10.10.10.10"
+DB_HOST = "ledger.db.com"
 DB_PORT = 3306
 DB_NAME = "ledgerdb"
 DB_USER_NAME = "ledger"
