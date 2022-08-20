@@ -60,7 +60,7 @@ def user_login(data):
     result = Users().find_by_userinfo(account)
 
     if result and check_password_hash(result["password"], password):
-        session['islogin'] = True
+        session['is_login'] = True
         session['user_id'] = result["id"]
         session['account'] = result["account"]
         session['user_name'] = result["username"]

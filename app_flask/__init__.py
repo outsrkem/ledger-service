@@ -35,8 +35,8 @@ def before():
         '/api/v1/ledger/common/user/register',
     ]
     if url not in pass_list:
-        if not session.get('islogin'):
-            return response_body(401, 'Invalid login status'), 401
+        if not session.get('is_login'):
+            return response_body(401, 'Token authentication failed')
 
 
 def init_app():

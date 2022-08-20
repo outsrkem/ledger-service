@@ -32,7 +32,7 @@ def r_user_login():
 
 @common.route("/user/logout", methods=['POST'])
 def r_user_logout():
-    if session.get('islogin'):
+    if session.get('is_login'):
         session.clear()
         return ''
     return '', 401
