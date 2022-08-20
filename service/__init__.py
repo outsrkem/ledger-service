@@ -1,3 +1,5 @@
+from flask import json
+
 from service.utility import now_timestamp
 
 
@@ -20,5 +22,6 @@ def response_body(code=200, msg='', payload=''):
 
     if payload:
         _response["payload"] = payload
-
-    return _response
+    """处理python字符集的问题"""
+    _response = json.dumps(_response, ensure_ascii=False)
+    return _response, code, {"Content-Type": "application/json"}

@@ -1,10 +1,11 @@
 # -*- coding=utf-8 -*-
-from flask import session
+from flask import session, json
 from service import response_body
 from werkzeug.security import check_password_hash, generate_password_hash
 from models.m_users import Users
 from settings import Logger
 from service.utility import to_json
+
 _log = Logger()
 
 
@@ -68,7 +69,6 @@ def user_login(data):
         payload = {"user_id": result["id"], "account": result["account"], "user_name": result["username"],
                    "describes": result["describes"],
                    "update_time": result["update_time"], "status": result["status"], "token": ""}
-
         _log.logger.info("Successful user login. userinfo: %s" % payload)
         return response_body(200, '', payload)
 
