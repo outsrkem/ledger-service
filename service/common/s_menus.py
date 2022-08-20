@@ -8,30 +8,26 @@ from service import response_body
 def query_layout_menus():
     # 查询菜单，构建返回体
     menus = list()
-    level_1 = Menus().find_by_menus_level1()
-    if level_1:
-        for i in level_1:
+    row_level_1 = Menus().find_by_menus_level1()
+    rem_list = ['seq_sort', 'update_time', 'create_time', 'describes', 'm_code', 'm_level', 'parent_menu_id']
+    if row_level_1:
+        for level1_menu in row_level_1:
             level_2 = list()
-            del i['seq_sort']
-            del i['update_time']
-            del i['create_time']
-            del i['describes']
-            del i['m_code']
-            del i['m_level']
-            del i['parent_menu_id']
 
-            for m in Menus().find_by_menus_level2(i["id"]):
-                del m['seq_sort']
-                del m['update_time']
-                del m['create_time']
-                del m['describes']
-                del m['m_code']
-                del m['m_level']
-                del m['parent_menu_id']
-                level_2.append(m)
+            """删除字典中多余的key：https://www.imangodoc.com/91882797.html"""
+            [level1_menu.pop(key) for key in rem_list]
+            level1_menu["leaf_node"] = []
+            row_leve_2 = Menus().find_by_menus_level2(level1_menu["id"])
+            """没有子菜单则不处理子菜单"""
+            if row_leve_2:
+                for level2_menu in row_leve_2:
+                    """删除字典中多余的key"""
+                    [level2_menu.pop(key) for key in rem_list]
+                    level2_menu["paths"] = level1_menu["paths"] + level2_menu["paths"]
+                    level_2.append(level2_menu)
 
-            i["leaf_node"] = level_2
-            menus.append(i)
+                level1_menu["leaf_node"] = level_2
+            menus.append(level1_menu)
 
         response = dict()
         response["items"] = menus
