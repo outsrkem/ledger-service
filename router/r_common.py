@@ -26,7 +26,7 @@ def r_user_register():
 @common.route("/user/login", methods=['POST'])
 def r_user_login():
     from service.user.s_user import user_login
-    row = user_login(json.loads(request.get_data()))
+    row = user_login(request.get_data())
     return row, row["meta_info"]["res_code"]
 
 

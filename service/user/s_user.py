@@ -4,7 +4,7 @@ from service import response_body
 from werkzeug.security import check_password_hash, generate_password_hash
 from models.m_users import Users
 from settings import Logger
-
+from service.utility import to_json
 _log = Logger()
 
 
@@ -23,9 +23,33 @@ def user_register(data):
 
 
 def user_login(data):
-    account = data["account"].strip()
-    password = data["password"].strip()
+    """处理登陆参数异常"""
+    data = to_json(data)
+    if not data:
+        return response_body(400, 'The json formatting fails or the parameter is abnormal')
+
+    try:
+        account = data["account"].strip()
+    except KeyError as e:
+        account = False
+        _log.logger.error("The login account parameter is abnormal: %s" % e)
+
+    try:
+        password = data["password"].strip()
+    except KeyError as e:
+        password = False
+        _log.logger.error("The login password parameter is abnormal: %s" % e)
+
+    """无账号或密码"""
+    if not account:
+        _log.logger.error("Login to terminate.")
+        return response_body(400, '''User login parameter error,No [account] number or [password].''')
+    elif not password:
+        return response_body(400, '''User login parameter error,No [account] number or [password].''')
+
+    """登陆校验"""
     result = Users().find_by_userinfo(account)
+
     if result and check_password_hash(result["password"], password):
         session['islogin'] = True
         session['user_id'] = result["id"]
