@@ -1,5 +1,5 @@
 # -*- coding=utf-8 -*-
-from flask import Blueprint, request, json, session, jsonify
+from flask import Blueprint, request, json, session
 
 from service.common.s_menus import query_layout_menus
 from service.common.s_money_type import add_deal_type, del_deal_type, update_deal_type, query_all_money_type, \

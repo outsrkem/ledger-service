@@ -1,5 +1,5 @@
 # -*- coding=utf-8 -*-
-from flask import session, json
+from flask import session
 from service import response_body
 from werkzeug.security import check_password_hash, generate_password_hash
 from models.m_users import Users
