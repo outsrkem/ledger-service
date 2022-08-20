@@ -11,9 +11,9 @@ class Users(dbmodel):
     __table__ = Table('ledger_user', metadata, autoload=True)
 
     @staticmethod
-    def user_register(username, passwd, mobile, describes):
+    def user_register(account,username, passwd, mobile, describes):
+        """注册用户，插入数据库"""
         now_time = now_timestamp()
-        account = mobile
         # noinspection PyBroadException
         try:
             dbsession.add(
@@ -23,6 +23,7 @@ class Users(dbmodel):
             dbsession.commit()
             return True
         except Exception as e:
+            print(e)
             dbsession.rollback()
             return False
 

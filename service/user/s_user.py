@@ -13,11 +13,19 @@ def user_register(data):
     username = data["username"].strip()
     password = data["password"].strip()
     mobile = data["mobile"].strip()
+    account = mobile
     describes = data["describes"]
 
+    """重复注册查询校验"""
+    is_register = Users().find_by_userinfo(account)
+    if is_register:
+        return response_body(409, 'A user with a mobile phone number is registered repeatedly.')
+
+    """用户注册"""
     passwd = generate_password_hash(password, method='pbkdf2:sha256', salt_length=16)
-    row = Users().user_register(username, passwd, mobile, describes)
+    row = Users().user_register(account, username, passwd, mobile, describes)
     if row:
+        _log.logger.info("User registration succeeded,account: %s" % account)
         return response_body(201)
     return response_body(500, 'User registration failure!')
 
