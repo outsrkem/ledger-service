@@ -52,7 +52,7 @@ def r_query_all_money_type():
 @common.route("/deal/type", methods=['POST'])
 def r_add_deal_type():
     # 添加交易类型
-    row = add_deal_type(json.loads(request.get_data()))
+    row = add_deal_type(request.get_data())
     return row
 
 

@@ -2,7 +2,7 @@
 from flask import session
 from models.m_money_type import MoneyType
 from service import response_body
-from service.utility import now_timestamp
+from service.utility import now_timestamp, to_json
 from settings import Logger
 
 _log = Logger()
@@ -35,7 +35,11 @@ def query_all_money_type():
     return response_body(404, 'The query is empty!')
 
 
-def add_deal_type(raw):
+def add_deal_type(data):
+    raw = to_json(data)
+    if not raw:
+        return response_body(400, 'The json formatting fails or the parameter is abnormal')
+
     for i in raw["raw_data"]:
         deal_types = MoneyType().find_by_money_type(i["category"])
         if not deal_types:  # 查询大类是否存在
