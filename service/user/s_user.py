@@ -74,3 +74,11 @@ def user_login(data):
 
     _log.logger.warning("User login failure. login account: %s" % data["account"])
     return response_body(403, 'Login Error')
+
+
+def user_preview(page=1, per_page=10):
+    """分页查询用户列表"""
+    _log.logger.info("Querying the User List; page:%s,per_page:%s" % (page, per_page))
+    payload = Users().find_by_users(page, per_page)
+    # payload = Users().find_by_user_for_permission_code(1000)
+    return response_body(200, "", payload)

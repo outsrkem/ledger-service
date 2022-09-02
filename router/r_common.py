@@ -38,6 +38,14 @@ def r_user_logout():
     return '', 401
 
 
+@common.route("/user/preview", methods=['GET'])
+def r_user_preview():
+    from service.user.s_user import user_preview
+    page, per_page = request.args.get('page', type=int), request.args.get('per_page', type=int)
+    row = user_preview(page, per_page)
+    return row
+
+
 @common.route("/deal/type", methods=['GET'])
 def r_query_all_money_type():
     type_id = request.args.get('type_id')
