@@ -1,7 +1,7 @@
 # -*- coding=utf-8 -*-
 
 from models import dbconnect
-from sqlalchemy import Table
+from sqlalchemy import Table, func
 from service.utility import now_timestamp
 
 dbsession, dbmodel, metadata = dbconnect()
@@ -33,9 +33,17 @@ class Users(dbmodel):
             return False
         return {c.name: getattr(result[0], c.name) for c in self.__table__.columns}
 
+    @staticmethod
+    def find_by_users_count():
+        """查询用户总数目"""
+        count = dbsession.query(func.count(Users.id)).scalar()
+        return count
+
     def find_by_users(self, page, per_page):
         """查用用户列表信息"""
-        results = dbsession.query(Users).paginate(page=page, per_page=per_page, error_out=False).items
+        # results = dbsession.query(Users).paginate(page=page, per_page=per_page, error_out=False).items
+        results = dbsession.query(Users).order_by(Users.id.desc()).limit(per_page).offset(
+            (page - 1) * per_page).all()
         results_list = list()
         if len(results) == 0:
             return False

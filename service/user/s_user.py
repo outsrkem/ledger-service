@@ -78,7 +78,13 @@ def user_login(data):
 
 def user_preview(page=1, per_page=10):
     """分页查询用户列表"""
+    payload = dict()
+    page_info = dict()
     _log.logger.info("Querying the User List; page:%s,per_page:%s" % (page, per_page))
-    payload = Users().find_by_users(page, per_page)
-    # payload = Users().find_by_user_for_permission_code(1000)
+    users_count = Users().find_by_users_count()
+    page_info["total"] = users_count
+    page_info["page_size"] = per_page
+    page_info["page"] = page
+    payload["page_info"] = page_info
+    payload["items"] = Users().find_by_users(page, per_page)
     return response_body(200, "", payload)

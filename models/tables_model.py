@@ -14,7 +14,7 @@ def create_ledger_options():
       `options_type` varchar(32) DEFAULT '' COMMENT '用于标识一组资源',
       `describes` varchar(255) DEFAULT NULL,
       PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB AUTO_INCREMENT=1001 DEFAULT CHARSET=utf8 COMMENT='配置表';
+    ) ENGINE=InnoDB AUTO_INCREMENT=2001 DEFAULT CHARSET=utf8 COMMENT='配置表';
     ''')
 
 
@@ -45,7 +45,7 @@ def create_ledger_role():
       `uid` int(11) NOT NULL DEFAULT 1 COMMENT '0: 系统内置，除管理员外不可编辑',
       `role_name` varchar(255) NOT NULL,
       `role_state` int(11) NOT NULL,
-      `role_type` int(11) DEFAULT NULL COMMENT '1,系统角色，不可删除；2,自定义角色',
+      `role_type` int(11) DEFAULT 2 COMMENT '1,系统角色，不可删除；2,自定义角色',
       `status` int(11) NOT NULL DEFAULT 1,
       `describes` varchar(255) DEFAULT NULL,
       `create_time` bigint(19) DEFAULT 1000000000000,
@@ -62,12 +62,17 @@ def create_ledger_permissions():
       `id` int(11) NOT NULL AUTO_INCREMENT,
       `uid` int(11) NOT NULL DEFAULT 0 COMMENT '0: 系统内置，除管理员外不可编辑',
       `permission_code` varchar(255) NOT NULL COMMENT '权限码',
+      `path` varchar(255) DEFAULT NULL COMMENT '请求路径',
+      `method` varchar(255) DEFAULT NULL COMMENT '请求方法',
+      `permission_type` varchar(255) DEFAULT NULL COMMENT '权限类型，读，写，删除，更新，列表等',
       `status` int(11) NOT NULL DEFAULT 1 COMMENT '1: 启用，正常；0：禁用',
+      `service_group` varchar(25) NOT NULL DEFAULT '' COMMENT '服务组，代表一组功能，英文简称',
+      `service_group_title` varchar(255) NOT NULL DEFAULT '' COMMENT '服务组中文简称',
       `describes` varchar(255) DEFAULT NULL COMMENT '描述，说明',
       `create_time` bigint(19) DEFAULT 1000000000000,
       `update_time` bigint(19) DEFAULT 1000000000000,
       PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB AUTO_INCREMENT=1001 DEFAULT CHARSET=utf8 COMMENT='权限码表';
+    ) ENGINE=InnoDB AUTO_INCREMENT=2001 DEFAULT CHARSET=utf8 COMMENT='权限码表';
     ''')
 
 
@@ -81,7 +86,7 @@ def create_ledger_role_permissions():
       `perm_id` int(11) NOT NULL COMMENT '',
       `create_time` bigint(19) DEFAULT 1000000000000,
       PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB AUTO_INCREMENT=1001 DEFAULT CHARSET=utf8 COMMENT='角色权限关联表';
+    ) ENGINE=InnoDB AUTO_INCREMENT=2001 DEFAULT CHARSET=utf8 COMMENT='角色权限关联表';
     ''')
 
 
@@ -95,7 +100,7 @@ def create_ledger_role_user():
       `user_id` int(11) NOT NULL COMMENT '',
       `create_time` bigint(19) DEFAULT 1000000000000,
       PRIMARY KEY (`id`)
-    ) ENGINE=InnoDB AUTO_INCREMENT=1001 DEFAULT CHARSET=utf8 COMMENT='角色用户关联表';
+    ) ENGINE=InnoDB AUTO_INCREMENT=2001 DEFAULT CHARSET=utf8 COMMENT='角色用户关联表';
     ''')
 
 

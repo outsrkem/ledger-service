@@ -41,7 +41,7 @@ def r_user_logout():
 @common.route("/user/preview", methods=['GET'])
 def r_user_preview():
     from service.user.s_user import user_preview
-    page, per_page = request.args.get('page', type=int), request.args.get('per_page', type=int)
+    page, per_page = request.args.get('page', type=int), request.args.get('pageSize', type=int)
     row = user_preview(page, per_page)
     return row
 
