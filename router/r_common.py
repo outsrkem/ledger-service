@@ -1,12 +1,19 @@
 # -*- coding=utf-8 -*-
 from flask import Blueprint, request, json, session
 
-from service.common.s_menus import query_layout_menus
+from service.common.s_menus import query_layout_menus, query_rest_options
 from service.common.s_money_type import add_deal_type, del_deal_type, update_deal_type, query_all_money_type, \
     query_money_type
 from service.common.s_money_type import deal_title_type
 
 common = Blueprint('common', __name__)
+
+
+@common.route("/rest/options", methods=['GET'])
+def r_rest_options():
+    # 环境配置
+    row = query_rest_options()
+    return row
 
 
 @common.route("/layout/menus", methods=['GET'])

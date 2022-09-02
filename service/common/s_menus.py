@@ -2,7 +2,17 @@
 from flask import session
 
 from models.m_menus import Menus
+from models.m_options import Options
 from service import response_body
+
+
+def query_rest_options():
+    options = dict()
+    user_id = session.get('user_id')
+    res = Options().find_by_options(user_id)
+    for opt in res:
+        options[opt["name"]] = opt["value"]
+    return response_body(200, '', options)
 
 
 def query_layout_menus():
