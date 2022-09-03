@@ -5,7 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from models.m_users import Users
 from service.common.s_menus import query_rest_options
 from settings import Logger
-from service.utility import to_json
+from service.utility import to_json, page_info
 
 _log = Logger()
 
@@ -80,12 +80,8 @@ def user_login(data):
 def user_preview(page=1, per_page=10):
     """分页查询用户列表"""
     payload = dict()
-    page_info = dict()
     _log.logger.info("Querying the User List; page:%s,per_page:%s" % (page, per_page))
     users_count = Users().find_by_users_count()
-    page_info["total"] = users_count
-    page_info["page_size"] = per_page
-    page_info["page"] = page
-    payload["page_info"] = page_info
+    payload["page_info"] = page_info(users_count, per_page, page)
     payload["items"] = Users().find_by_users(page, per_page)
     return response_body(200, "", payload)

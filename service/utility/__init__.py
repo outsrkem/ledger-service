@@ -23,3 +23,11 @@ def to_json(t_str):
         _log.logger.error("The json formatting fails. Procedure, %s, str: %s" % (e, t_str))
         return False
     return json.loads(t_str)
+
+
+def page_info(total, page_size, page):
+    _page_info = dict()
+    _page_info["total"] = total
+    _page_info["page_size"] = page_size
+    _page_info["page"] = page
+    return _page_info

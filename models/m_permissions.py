@@ -1,7 +1,7 @@
 # -*- coding=utf-8 -*-
 
 from models import dbconnect
-from sqlalchemy import Table
+from sqlalchemy import Table, func
 from service.utility import now_timestamp
 
 dbsession, dbmodel, metadata = dbconnect()
@@ -9,6 +9,11 @@ dbsession, dbmodel, metadata = dbconnect()
 
 class Permissions(dbmodel):
     __table__ = Table('ledger_permissions', metadata, autoload=True)
+
+    @staticmethod
+    def find_by_permission_count():
+        count = dbsession.query(func.count(Permissions.id)).scalar()
+        return count
 
     def find_by_permission(self, page, per_page):
         """查询所有权限列表"""
