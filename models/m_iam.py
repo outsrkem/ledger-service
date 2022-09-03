@@ -31,4 +31,4 @@ class Iam(dbmodel):
             for i in result:
                 permission_list.append(i["permission_code"])
             return permission_list
-        return False
+        return list()

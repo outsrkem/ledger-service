@@ -28,3 +28,10 @@ class Permissions(dbmodel):
             i.pop("create_time")
             i.pop("update_time")
         return results_list
+
+    @staticmethod
+    def find_by_api_permission(path, method):
+        result = dbsession.query(Permissions.permission_code).filter_by(path=path, method=method).all()
+        if len(result) == 0:
+            return False
+        return result[0][0]

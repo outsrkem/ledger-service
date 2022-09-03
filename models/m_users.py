@@ -1,4 +1,5 @@
 # -*- coding=utf-8 -*-
+from flask import session
 
 from models import dbconnect
 from sqlalchemy import Table, func
@@ -51,5 +52,8 @@ class Users(dbmodel):
             results_list.append({c.name: getattr(i, c.name) for c in self.__table__.columns})
         # 删除结果中的密码信息
         for i in results_list:
+            i["is_edited"] = 1
+            if i["id"] == session.get('user_id'):
+                i["is_edited"] = 0
             i.pop("password")
         return results_list
