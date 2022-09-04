@@ -32,3 +32,25 @@ class Iam(dbmodel):
                 permission_list.append(i["permission_code"])
             return permission_list
         return list()
+
+    @staticmethod
+    def find_by_permission_for_role_id(role_id):
+        sql = '''SELECT
+                    ledger_permissions.id,
+                    ledger_permissions.permission_code,
+                    ledger_permissions.service_group,
+                    ledger_permissions.service_group_title,
+                    ledger_permissions.permission_type
+                FROM
+                    ledger_role_permission,
+                    ledger_role,
+                    ledger_permissions
+                WHERE
+                    ledger_role_permission.role_id = ledger_role.id
+                AND ledger_role_permission.perm_id = ledger_permissions.id
+                AND ledger_role.id = ''' + str(role_id) + '''
+                ORDER BY
+                    ledger_permissions.id ASC'''
+        results = dbsession.execute(sql)
+        result = [dict(zip(result.keys(), result)) for result in results]
+        return result

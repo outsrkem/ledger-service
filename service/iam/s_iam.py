@@ -3,6 +3,7 @@ from flask import session, request
 
 from models.m_iam import Iam
 from models.m_rols import Role
+from models.role_permission import RolePermission
 from service import response_body
 from models.m_permissions import Permissions
 from settings import Logger
@@ -51,3 +52,11 @@ def check_permission(path, method):
     else:
         _log.logger.info("Permission to check error. %s %s" % (method, path))
         return False, {"message": "No Permission.", "permission_code": permission_code}
+
+
+def permission_for_role_id(role_id, per_page, page):
+    payload = dict()
+    count = RolePermission().find_by_permission_for_role_id_count(role_id)
+    payload["page_info"] = page_info(count, per_page, page)
+    payload["items"] = Iam().find_by_permission_for_role_id(role_id)
+    return response_body(200, "", payload)
