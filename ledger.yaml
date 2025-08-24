@@ -1,25 +1,25 @@
 ledger:
-  app:
-    bind: "0.0.0.0:18195"
-  database:
-    host: "127.0.0.1"
-    port: "3306"
-    name: "ledgerdb"
-    user: "ledger"
-    passwd: ""
-  ats:
-    endpoint: "http://127.0.0.1:18185"
-  uias:
-    endpoint: "https://uias.apilocalvm.outsrkem.top:30078"
-    accessKeyId: ""
-    accessKeySecret: ""
-  log:
-    level: "INFO"
-    output:
-      #stdout: "-"
-      file:
-        name: "/opt/service/ledger/logs/service.log"
-        maxsize: 1
-        maxbackups: 2
-        maxage: 3
-        compress: true
+    app:
+        bind: "0.0.0.0:18200"
+    database:
+        host: "127.0.0.1"
+        port: "3306"
+        name: "ledgerdb"
+        user: "ledger"
+        passwd: ""
+    ats:
+        endpoint: "http://127.0.0.1:18185"
+    uias:
+        endpoint: "https://uias.apilocalvm.outsrkem.top:30078"
+        accessKeyId: ""
+        accessKeySecret: ""
+    log:
+        level: "INFO"
+        output:
+            #stdout: "-"
+            file:
+                name: "/opt/service/ledger/logs/service.log"
+                maxsize: 1
+                maxbackups: 2
+                maxage: 3
+                compress: true

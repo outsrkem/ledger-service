@@ -1,0 +1,19 @@
+version: "3"
+networks:
+    network_0:
+        external: true
+services:
+    ledger:
+        image: swr.cn-north-1.myhuaweicloud.com/onge/ledger:build_0
+        restart: always
+        container_name: ledger
+        networks:
+            network_0:
+                aliases:
+                    - ledger.svc.local
+        ports:
+            - "0.0.0.0:18200:18200/tcp"
+        volumes:
+            - /etc/localtime:/etc/localtime:ro
+            - /opt/service/ledger/logs:/opt/service/ledger/logs
+            - /opt/service/ledger/ledger.yaml:/etc/ledger/ledger.yaml:ro
