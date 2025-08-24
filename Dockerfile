@@ -27,6 +27,7 @@ ARG APP_VERSION
 ARG APP_REVISION
 
 COPY --from=0 /opt/$APP_NAME/output/ /usr/local/bin
+RUN mkdir "/etc/ledger" && mv /usr/local/bin/ledger.yaml /etc/ledger/ledger.yaml
 
 ENV APP_NAME=$APP_NAME APP_VERSION=$APP_VERSION APP_REVISION=$APP_REVISION
 

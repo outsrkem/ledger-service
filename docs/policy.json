@@ -1,0 +1,13 @@
+{
+    "name": "LedgerFullAccess",
+    "description": "拥有记账薄所有权限",
+    "permit": {
+        "Version": "1.0",
+        "Statement": [
+            {
+                "Action": ["ledger:*:*"],
+                "Effect": "Allow"
+            }
+        ]
+    }
+}

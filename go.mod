@@ -4,6 +4,7 @@ go 1.22.0
 
 require (
 	github.com/cloudwego/hertz v0.10.1
+	github.com/hiuias/uias-sdk-go v0.0.1-rc.1
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/shopspring/decimal v1.4.0
 	github.com/sirupsen/logrus v1.9.3

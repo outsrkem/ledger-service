@@ -3,6 +3,7 @@ package route
 import (
 	"context"
 	"ledger/src/service/category"
+	"ledger/src/service/detail"
 	"net/http"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -15,25 +16,24 @@ func Middleware(h *server.Hertz) {
 	h.Use(RequestRecorder())
 }
 
-func helloWorld() func(c context.Context, ctx *app.RequestContext) {
-	return func(c context.Context, ctx *app.RequestContext) {
-		ctx.JSON(http.StatusOK, utils.H{"message": "Hello World"})
+func helloWorld() func(ctx context.Context, c *app.RequestContext) {
+	return func(ctx context.Context, c *app.RequestContext) {
+		c.JSON(http.StatusOK, utils.H{"message": "Hello World."})
 	}
 }
 
 func AppRoute(h *server.Hertz) {
 	h.GET("/", helloWorld())
-	//income 收入  disbursement 支出
-	h.POST("/api/v1/category", category.CreateCategory())       // 创建分类
-	h.GET("/api/v1/category", category.SelectCategory())        // 查询分类
-	h.PATCH("/api/v1/category/:id", category.UpdateCategory())  // 修改分类
-	h.DELETE("/api/v1/category/:id", category.DeleteCategory()) // 删除分类
 
-	h.POST("/api/v1/finances/transactions", helloWorld())       // 添加记账流水
-	h.GET("/api/v1/finances/transactions", helloWorld())        // 查询记账流水
-	h.PATCH("/api/v1/finances/transactions/:id", helloWorld())  // 修改
-	h.DELETE("/api/v1/finances/transactions/:id", helloWorld()) // 删除
+	h.POST("/v1/category", apc("ledger:category:create"), category.CreateCategory())       // 创建分类
+	h.GET("/v1/category", apc("ledger:category:list"), category.SelectCategory())          // 查询分类 √
+	h.PATCH("/v1/category/:id", apc("ledger:category:update"), category.UpdateCategory())  // 修改分类
+	h.DELETE("/v1/category/:id", apc("ledger:category:delete"), category.DeleteCategory()) // 删除分类
 
-	h.GET("/api/v1/finances/statistics", helloWorld()) // 统计收支
+	h.POST("/v1/transactions", apc("ledger:transaction:create"), detail.CreateTransaction())       // 添加记账流水 √
+	h.GET("/v1/transactions", apc("ledger:transaction:list"), detail.SelectTransaction())          // 查询记账流水 √
+	h.PATCH("/v1/transactions/:id", apc("ledger:transaction:update"), helloWorld())                // 修改
+	h.DELETE("/v1/transactions/:id", apc("ledger:transaction:delete"), detail.DeleteTransaction()) // 删除 √
 
+	h.GET("/v1/finances/statistics", apc(""), helloWorld()) // 统计收支
 }

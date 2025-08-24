@@ -31,6 +31,10 @@ github.com/golang/protobuf v1.5.0 h1:LUVKkCeviFUMKqHa4tXIIij/lbhnMbP7Fn5wKdKkRh4
 github.com/golang/protobuf v1.5.0/go.mod h1:FsONVRAS9T7sI+LIUmWTfcYkHO4aIWwzhcaSAoJOfIk=
 github.com/google/go-cmp v0.5.5 h1:Khx7svrCpmxxtHBq5j2mp/xVjsi8hQMfNLvJFAlrGgU=
 github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
+github.com/hiuias/uias-sdk-go v0.0.1-rc.1 h1:A/HreHb5qV8MgNL/HG855Qi+Gtx7xDPPIr0KGtaEyvc=
+github.com/hiuias/uias-sdk-go v0.0.1-rc.1/go.mod h1:B1OhB53evFJT9ZsMxdvVITzOWgEFMJEsARPEzBPo5M8=
+github.com/hiuias/uias-sdk-go v0.0.1 h1:iSSbjlV0DjQCJj7SKgh1H3aKSjzAhEVe62ZHvPrJ3LI=
+github.com/hiuias/uias-sdk-go v0.0.1/go.mod h1:B1OhB53evFJT9ZsMxdvVITzOWgEFMJEsARPEzBPo5M8=
 github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=
 github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkryuEj+Srlc=
 github.com/jinzhu/now v1.1.5 h1:/o9tlHleP7gOFmsnYNz3RGnqzefHA47wQpKrrdTIwXQ=

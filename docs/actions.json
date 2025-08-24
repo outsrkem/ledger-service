@@ -1,0 +1,74 @@
+[
+    {
+        "actionInfo": {
+            "name": "ledger:transaction:create",
+            "group": "ReadWrite",
+            "title": "添加流水",
+            "description": "添加流水",
+            "status": "enabled"
+        }
+    },
+    {
+        "actionInfo": {
+            "name": "ledger:transaction:delete",
+            "group": "ReadWrite",
+            "title": "删除流水",
+            "description": "删除流水",
+            "status": "enabled"
+        }
+    },
+    {
+        "actionInfo": {
+            "name": "ledger:transaction:update",
+            "group": "ReadWrite",
+            "title": "修改流水",
+            "description": "修改流水",
+            "status": "enabled"
+        }
+    },
+    {
+        "actionInfo": {
+            "name": "ledger:transaction:list",
+            "group": "ReadOnly",
+            "title": "查询流水",
+            "description": "查询流水",
+            "status": "enabled"
+        }
+    },
+    {
+        "actionInfo": {
+            "name": "ledger:category:create",
+            "group": "ReadWrite",
+            "title": "添加分类",
+            "description": "添加分类",
+            "status": "enabled"
+        }
+    },
+    {
+        "actionInfo": {
+            "name": "ledger:category:delete",
+            "group": "ReadWrite",
+            "title": "删除分类",
+            "description": "删除分类",
+            "status": "enabled"
+        }
+    },
+    {
+        "actionInfo": {
+            "name": "ledger:category:update",
+            "group": "ReadWrite",
+            "title": "修改分类",
+            "description": "修改分类",
+            "status": "enabled"
+        }
+    },
+    {
+        "actionInfo": {
+            "name": "ledger:category:list",
+            "group": "ReadOnly",
+            "title": "查询分类",
+            "description": "查询分类",
+            "status": "enabled"
+        }
+    }
+]

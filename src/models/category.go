@@ -1,15 +1,17 @@
 package models
 
-import "time"
+import (
+	"ledger/src/database/mysql"
+	"time"
+)
 
 // OrmCategory 分类表
 type OrmCategory struct {
-	Kid        int    `gorm:"column:kid;primaryKey"` // 主键ID
-	Title      string `gorm:"column:title"`          // 分类名称
-	Pid        int    `gorm:"column:pid"`            // 父类的ID,1代表大类
-	Type       string `gorm:"column:type"`           // 收入1，支出2
-	Sort       uint8  `gorm:"column:sort"`           // 数字越小越靠前
-	UpdateTime int64  `gorm:"column:update_time"`    // 记录时间
+	Kid        int64  `gorm:"column:kid;primaryKey"` // 主键ID
+	InstanceId string `gorm:"column:instance_id"`    // 实例ID
+	Name       string `gorm:"column:name"`           // 分类名称
+	Direction  int8   `gorm:"column:direction"`      // 1=收入，2=支出
+	Pid        int64  `gorm:"column:pid"`            // 父类的ID
 	CreateTime int64  `gorm:"column:create_time"`    // 更新时间
 }
 
@@ -24,13 +26,14 @@ func FindCategoryByType(t string) ([]*OrmCategory, error) {
 	return category, err
 }
 
-// FindCategoryAll 查询所有分类
-func FindCategoryAll(pageSize, page int, count *int64) ([]*OrmCategory, error) {
+// FindCategoryByUser 按类型查询用户的所有分类
+func FindCategoryByUser(instanceId string, Direction int8) ([]*OrmCategory, error) {
 	var category []*OrmCategory
-	err := db.Model(&OrmCategory{}).Count(count).
-		Limit(pageSize).Offset((page - 1) * pageSize).
-		Find(&category).Error
-	return category, err
+	r := mysql.OrmDB.Model(&OrmCategory{}).
+		Where("instance_id is NULL OR instance_id = ?", instanceId).
+		Where("direction = ?", Direction).
+		Find(&category)
+	return category, r.Error
 }
 
 // CreateCategory 创建分类

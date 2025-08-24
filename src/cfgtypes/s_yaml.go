@@ -33,6 +33,7 @@ type Ats struct {
 type Uias struct {
 	Endpoint        string `yaml:"endpoint"`
 	SkipTlsVerify   bool   `yaml:"skipTlsVerify"`
+	CACertPath      string `yaml:"caCertPath"` // 上游ssl的ca证书，优先级更高
 	AccessKeyId     string `yaml:"accessKeyId"`
 	AccessKeySecret string `yaml:"accessKeySecret"`
 }
