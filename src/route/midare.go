@@ -69,12 +69,7 @@ func apc(action string) app.HandlerFunc {
 			return
 		}
 
-		resp, err := client.VerifyAction(
-			ctx,
-			c.Request.Header.Get(xRequestIdKey),
-			c.Request.Header.Get(xAuthTokenKey),
-			rawBody,
-		)
+		resp, err := client.VerifyAction(ctx, c.Request.Header.Get(xRequestIdKey), c.Request.Header.Get(xAuthTokenKey), rawBody)
 		if err != nil {
 			klog.Warnf("Permission verification error, upstream exception: %v", err)
 			c.JSON(500, resp)
@@ -83,7 +78,7 @@ func apc(action string) app.HandlerFunc {
 		}
 
 		if resp.Payload.Authentication != 1 {
-			// 没有权限，返回403和上游返回体，便于查看问题
+			// 没有权限，返回403和上游返回体
 			klog.Warnf("Permission denial. result: %+v", resp)
 			c.JSON(403, resp)
 			c.Abort()

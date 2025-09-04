@@ -25,9 +25,11 @@ type ReqDetail struct {
 
 // Detail 账目明细
 type Detail struct {
+	Name     string          `json:"name"`     // 物品名称（如“牛奶”）
 	Quantity int             `json:"quantity"` // 数目（如：2件商品、2次服务）
-	Unit     decimal.Decimal `json:"unit"`     // 单价（保留与原金额一致的精度）
+	Price    decimal.Decimal `json:"price"`    // 单价
 	Total    decimal.Decimal `json:"total"`    // 总价（数目 × 单价，与原 amount 绝对值匹配）
+	Remark   string          `json:"cremark"`  // 详细备注
 }
 
 // 转换时间字符串为毫秒时间戳
@@ -69,8 +71,7 @@ func CreateTransaction() func(ctx context.Context, c *app.RequestContext) {
 		}
 
 		now := common.CreateTimestamp()
-		dbData := make([]*models.OrmTransaction, 0)
-		dbData = append(dbData, &models.OrmTransaction{
+		dbData := &models.OrmTransaction{
 			InstanceId: instanceId,
 			CategoryId: ReqData.Cid,
 			Amount:     ReqData.Amount,
@@ -78,16 +79,39 @@ func CreateTransaction() func(ctx context.Context, c *app.RequestContext) {
 			Remark:     ReqData.Remark,
 			UpdateTime: now,
 			CreateTime: now,
-		})
-
-		err = models.InstallTransaction(dbData)
-		if err != nil {
-			klog.Errorf("insert transaction failed %v", err)
-			c.JSON(http.StatusInternalServerError,
-				answer.ResBody(answer.EcodeError,
-					"Failed to create transaction. Try again later.", ""))
-			return
 		}
+
+		if len(ReqData.Detail) <= 0 {
+			// 没有明细
+			err = models.InstallTransaction(dbData)
+			if err != nil {
+				klog.Errorf("insert transaction failed %v", err)
+				c.JSON(http.StatusInternalServerError,
+					answer.ResBody(answer.EcodeError,
+						"Failed to create transaction. Try again later.", ""))
+				return
+			}
+		} else {
+			detail := make([]*models.OrmDetail, 0)
+			// 有明细详情
+			for _, val := range ReqData.Detail {
+				detail = append(detail, &models.OrmDetail{
+					Name:     val.Name,
+					Quantity: val.Quantity,
+					Price:    val.Price,
+					Total:    val.Total,
+				})
+			}
+			err = models.InstallTransactionAndDetail(dbData, detail)
+			if err != nil {
+				klog.Errorf("insert transaction failed %v", err)
+				c.JSON(http.StatusInternalServerError,
+					answer.ResBody(answer.EcodeError,
+						"Failed to create transaction. Try again later.", ""))
+				return
+			}
+		}
+
 		c.JSON(http.StatusCreated, answer.ResBody(answer.EcodeOK, nil, nil))
 	}
 }
