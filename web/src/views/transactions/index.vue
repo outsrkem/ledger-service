@@ -22,6 +22,7 @@
                 </el-table-column>
                 <el-table-column width="300" label="操作">
                     <template #default="scope">
+                        <el-button link type="primary" @click="onDetail(scope.row)">查看详情</el-button>
                         <el-button link type="primary" @click="onUpdate(scope.row)">修改</el-button>
                         <el-popconfirm
                             class="box-item"
@@ -109,8 +110,11 @@ export default {
         onAddTransactions() {
             this.$refs.AddTransactions.onOpenDialog();
         },
-        onDeleteTransactions(val) {
+        // 查看详情
+        onDetail(val) {
             console.log(val);
+        },
+        onDeleteTransactions(val) {
             DelTransactions(val.id)
                 .then(() => {
                     this.$message.success(msgcon("删除成功"));

@@ -34,12 +34,12 @@ export default defineConfig({
     server: {
         proxy: {
             "/api": {
-                target: "https://turtle.outsrkem.top:35860",
+                target: "http://turtle.service.local:35860",
                 // rewrite: (path) => path.replace(/^\/api/, ""),
                 changeOrigin: true,
             },
             "/authui": {
-                target: "https://turtle.outsrkem.top:35860",
+                target: "http://turtle.service.local:35860",
                 // rewrite: (path) => path.replace(/^\/api/, ""),
                 changeOrigin: true,
             },

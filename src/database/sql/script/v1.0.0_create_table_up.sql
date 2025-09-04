@@ -73,12 +73,12 @@ CREATE TABLE `ledger_transaction`  (
 CREATE TABLE `ledger_detail`  (
   `kid` int(11) NOT NULL AUTO_INCREMENT COMMENT '明细ID（主键）',
   `transaction_id` int(11) NOT NULL COMMENT '关联交易ID',
-  `item_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '物品名称（如“牛奶”）',
-  `quantity` decimal(6, 2) NOT NULL COMMENT '数量（支持小数）',
-  `unit` decimal(10, 4) NOT NULL COMMENT '单价',
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '物品名称（如“牛奶”）',
+  `quantity` decimal(10, 4) NOT NULL COMMENT '数量（支持小数）',
+  `price` decimal(10, 4) NOT NULL COMMENT '单价',
   `total` decimal(10, 4) NOT NULL COMMENT '该项总价',
   `remark` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '明细备注（如“促销装”）',
   PRIMARY KEY (`kid`) USING BTREE,
   INDEX `fk_detail_transaction`(`transaction_id`) USING BTREE,
-  CONSTRAINT `fk_detail_transaction` FOREIGN KEY (`transaction_id`) REFERENCES `ledger_transaction` (`kid`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_detail_transaction` FOREIGN KEY (`transaction_id`) REFERENCES `ledger_transaction` (`kid`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1000000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '交易明细表' ROW_FORMAT = DYNAMIC;

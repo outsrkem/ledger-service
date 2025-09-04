@@ -59,6 +59,47 @@
                         </div>
                     </div>
                 </el-form-item>
+
+                <!-- 明细部分 -->
+                <el-form-item label=" ">
+                    <!-- 按钮和表头容器，使用Flex布局 -->
+                    <div class="detail-top-container">
+                        <el-button type="primary" style="width: 340px" :icon="Plus" @click="addDetailRow">添加明细 </el-button>
+                    </div>
+
+                    <!-- 明细行 -->
+                    <div v-for="(row, index) in detailRows" :key="row.id" class="detail-row">
+                        <el-input
+                            v-model="row.name"
+                            placeholder="请输入物品名称"
+                            style="width: 30%; margin-right: 1%"
+                            @input="calculateTotal(index)"
+                        ></el-input>
+
+                        <el-input
+                            v-model.number="row.quantity"
+                            placeholder="请输入数量"
+                            style="width: 15%; margin-right: 1%"
+                            @input="calculateTotal(index)"
+                        ></el-input>
+
+                        <el-input
+                            v-model="row.price"
+                            placeholder="请输入单价"
+                            style="width: 15%; margin-right: 1%"
+                            @input="calculateTotal(index)"
+                        ></el-input>
+
+                        <el-input v-model="row.total" placeholder="总额" style="width: 20%; margin-right: 1%"></el-input>
+                        <el-button type="text" :icon="Remove" @click="removeDetailRow(index)"></el-button>
+                    </div>
+
+                    <!-- 总计 -->
+                    <div class="detail-total" v-if="detailRows.length > 0">
+                        <span>明细总计: {{ totalAmount.toFixed(4) }}</span>
+                    </div>
+                </el-form-item>
+
                 <el-form-item label="写点备注">
                     <el-input v-model="formdata.remark" />
                 </el-form-item>
@@ -76,6 +117,7 @@
 import dayjs from "dayjs";
 import { msgcon } from "../../utils/message.js";
 import { Getcategory, AddTransactions } from "../../api/basic.js";
+import { Plus, Remove } from "@element-plus/icons-vue";
 export default {
     name: "AddTransactionsIndex",
     props: {
@@ -83,6 +125,12 @@ export default {
             type: Object,
             default: () => ({}),
         },
+    },
+    setup() {
+        return {
+            Plus,
+            Remove,
+        };
     },
     data() {
         return {
@@ -95,6 +143,8 @@ export default {
                 subcategory: "",
                 remark: "",
             },
+            // 明细行数据
+            detailRows: [],
             category: [],
             subcategory: [],
             activeRowIndex: -1, // 当前激活的父分类行索引
@@ -108,13 +158,19 @@ export default {
     computed: {
         // 将分类数据按每行rowmax个进行分组
         categorizedCategories() {
-            const rowmax = 7; // 每7个分为一组
+            const rowmax = 12; // 每12个分为一组
             const rows = [];
-            // 遍历所有分类，
+            // 遍历所有分类
             for (let i = 0; i < this.category.length; i += rowmax) {
                 rows.push(this.category.slice(i, i + rowmax));
             }
             return rows;
+        },
+        // 计算所有明细的总额
+        totalAmount() {
+            return this.detailRows.reduce((sum, row) => {
+                return sum + (Number(row.total) || 0);
+            }, 0);
         },
     },
     methods: {
@@ -123,6 +179,7 @@ export default {
             this.formdata.category = "";
             this.formdata.subcategory = "";
             this.formdata.remark = "";
+            this.detailRows = []; // 清空明细
             this.onSetNowTime();
             this.dialogVisible = true;
             this.$nextTick(() => {
@@ -135,49 +192,89 @@ export default {
             this.dialogVisible = false;
         },
         async validateForm() {
-            return new Promise((resolve) => {
+            // 验证主表单
+            const mainFormValid = await new Promise((resolve) => {
                 this.$refs["form"].validate((valid) => {
                     resolve(valid);
                 });
             });
+
+            // 验证明细行
+            if (this.detailRows.length > 0) {
+                for (let i = 0; i < this.detailRows.length; i++) {
+                    const row = this.detailRows[i];
+                    if (!row.name) {
+                        this.$message.error(`第${i + 1}行明细：请输入物品名称`);
+                        return false;
+                    }
+                    if (row.quantity === null || isNaN(Number(row.quantity)) || Number(row.quantity) <= 0) {
+                        this.$message.error(`第${i + 1}行明细：请输入有效的个数`);
+                        return false;
+                    }
+                    if (row.price === null || isNaN(Number(row.price)) || Number(row.price) <= 0) {
+                        this.$message.error(`第${i + 1}行明细：请输入有效的单价`);
+                        return false;
+                    }
+                }
+            }
+
+            return mainFormValid;
         },
         async onSubmit(val) {
             const valid = await this.validateForm();
             if (!valid) return;
+
             let cid = 0;
             if (this.formdata.subcategory === "") {
                 cid = this.formdata.category;
             } else {
                 cid = this.formdata.subcategory;
             }
-            let amount = this.formdata.amount;
+
+            // 将总金额转换为数字
+            let amount = Number(this.formdata.amount);
             if (this.formdata.direction === 2) {
                 amount = amount * -1;
             }
+
+            // 处理明细数据，确保数量和金额为数字类型
+            const formattedDetails = this.detailRows.map((row) => ({
+                name: row.name,
+                quantity: Number(row.quantity), // 转换为数字
+                price: Number(row.price), // 转换为数字
+                total: Number(row.total), // 转换为数字
+            }));
+
+            // 准备提交的数据，包含格式化后的明细
             const data = {
                 cid: cid,
                 occ_time: this.formdata.occ_time,
                 amount: amount,
                 remark: this.formdata.remark,
+                detail: formattedDetails, // 提交转换后的明细数据
             };
+
             this.$nextTick(() => {
-                // 这里面会重置状态，导致时间闪烁
                 if (this.$refs["form"]) {
                     this.$refs["form"].resetFields();
                 }
             });
+
             AddTransactions(data)
                 .then(() => {
                     this.$message.success(msgcon("添加成功"));
                     this.$globalBus.emit("onRefresh");
                     if (val === 1) {
+                        // 保留对话框，清空部分字段
                         this.formdata.amount = "";
                         this.formdata.category = "";
                         this.formdata.subcategory = "";
                         this.formdata.remark = "";
+                        this.detailRows = []; // 清空明细
                         this.onSetNowTime();
                     } else {
                         this.dialogVisible = false;
+                        this.detailRows = []; // 清空明细
                     }
                 })
                 .catch((err) => {
@@ -239,6 +336,31 @@ export default {
             this.formdata.subcategory = "";
             this.subcategory = this.getChildrenWithValue(this.category, value);
         },
+
+        // 添加明细行
+        addDetailRow() {
+            this.detailRows.push({
+                name: "",
+                quantity: null,
+                price: null,
+                total: null,
+            });
+        },
+
+        // 移除明细行
+        removeDetailRow(index) {
+            this.detailRows.splice(index, 1);
+        },
+
+        // 计算单行总额
+        calculateTotal(index) {
+            const row = this.detailRows[index];
+            if (row && row.quantity !== null && row.price !== null) {
+                const quantity = Number(row.quantity);
+                const price = Number(row.price);
+                row.total = (quantity * price).toFixed(4);
+            }
+        },
     },
     created() {
         this.loadGetCategory();
@@ -268,7 +390,7 @@ export default {
 }
 
 .category-row {
-    margin-bottom: 8px; /* 行之间的间距 */
+    margin-bottom: 2px; /* 行之间的间距 */
 }
 
 .category-segment {
@@ -285,6 +407,27 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* 明细样式 */
+.detail-top-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.detail-total {
+    margin-top: 10px;
+    text-align: right;
+    font-weight: bold;
+    color: #1890ff;
+    border-top: 1px solid #e8e8e8;
 }
 
 /* 淡入动画效果 */
