@@ -16,5 +16,5 @@ type OrmDetail struct {
 }
 
 func (OrmDetail) TableName() string {
-	return SetTableName("detail")
+	return TableNameDetail
 }

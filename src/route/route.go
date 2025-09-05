@@ -4,6 +4,7 @@ import (
 	"context"
 	"ledger/src/service/category"
 	"ledger/src/service/detail"
+	"ledger/src/service/tag"
 	"net/http"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -34,6 +35,8 @@ func AppRoute(h *server.Hertz) {
 	h.GET("/v1/transactions", apc("ledger:transaction:list"), detail.SelectTransaction())          // 查询记账流水 √
 	h.PATCH("/v1/transactions/:id", apc("ledger:transaction:update"), helloWorld())                // 修改
 	h.DELETE("/v1/transactions/:id", apc("ledger:transaction:delete"), detail.DeleteTransaction()) // 删除 √
+
+	h.POST("/v1/tag", apc("ledger:tag:create"), tag.CreateTag()) // 创建标签
 
 	h.GET("/v1/finances/statistics", apc(""), helloWorld()) // 统计收支
 }

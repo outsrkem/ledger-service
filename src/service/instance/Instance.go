@@ -3,11 +3,14 @@ package instance
 import (
 	"errors"
 	"fmt"
-	"gorm.io/gorm"
 	"ledger/src/global"
 	"ledger/src/models"
 	"ledger/src/pkg/common"
+
+	"gorm.io/gorm"
 )
+
+const InstanceValidity = 3600 * 2 // 实例ID缓存有效期
 
 func GetInstanceId(userId string) (string, error) {
 	// 1. 前置校验：用户ID非空且格式合法
@@ -39,7 +42,7 @@ func GetInstanceId(userId string) (string, error) {
 		}
 		instanceId := newInstance.InstanceId
 		// 更新缓存：将新实例ID存入缓存（有效期1天）
-		global.GCache.Set(userId, instanceId, 3600*24)
+		global.GCache.Set(userId, instanceId, InstanceValidity)
 		return instanceId, nil
 
 	// 3.2 数据库查询错误（如连接失败、SQL错误）：直接返回错误
@@ -49,7 +52,7 @@ func GetInstanceId(userId string) (string, error) {
 	// 3.3 数据库查询成功：更新缓存并返回
 	default:
 		instanceId := instance.InstanceId
-		global.GCache.Set(userId, instanceId, 3600*24)
+		global.GCache.Set(userId, instanceId, InstanceValidity)
 		return instanceId, nil
 	}
 }
