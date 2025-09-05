@@ -6,8 +6,10 @@ import (
 
 var db = mysql.OrmDB
 
-const TablesPrefix = "ledger_" // 表前缀
-
-func SetTableName(name string) string {
-	return TablesPrefix + name
-}
+const (
+	TableNameInstance    = "ledger_instance"
+	TableNameCategory    = "ledger_category"
+	TableNameTransaction = "ledger_transaction"
+	TableNameDetail      = "ledger_detail"
+	TableNameTag         = "ledger_tag"
+)

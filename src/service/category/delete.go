@@ -2,8 +2,9 @@ package category
 
 import (
 	"context"
-	"github.com/cloudwego/hertz/pkg/app"
 	"ledger/src/slog"
+
+	"github.com/cloudwego/hertz/pkg/app"
 )
 
 func DeleteCategory() func(ctx context.Context, c *app.RequestContext) {

@@ -16,7 +16,7 @@ type OrmCategory struct {
 }
 
 func (OrmCategory) TableName() string {
-	return SetTableName("category")
+	return TableNameCategory
 }
 
 // FindCategoryByType 查询收入或支出的分类

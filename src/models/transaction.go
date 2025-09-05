@@ -20,7 +20,7 @@ type OrmTransaction struct {
 }
 
 func (OrmTransaction) TableName() string {
-	return SetTableName("transaction")
+	return TableNameTransaction
 }
 
 // InstallTransaction 新增交易及明细

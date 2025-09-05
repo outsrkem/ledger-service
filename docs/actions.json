@@ -70,5 +70,14 @@
             "description": "查询分类",
             "status": "enabled"
         }
+    },
+    {
+        "actionInfo": {
+            "name": "ledger:tag:create",
+            "group": "ReadWrite",
+            "title": "创建标签",
+            "description": "创建标签",
+            "status": "enabled"
+        }
     }
 ]

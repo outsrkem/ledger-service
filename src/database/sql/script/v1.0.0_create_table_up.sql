@@ -82,3 +82,28 @@ CREATE TABLE `ledger_detail`  (
   INDEX `fk_detail_transaction`(`transaction_id`) USING BTREE,
   CONSTRAINT `fk_detail_transaction` FOREIGN KEY (`transaction_id`) REFERENCES `ledger_transaction` (`kid`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1000000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '交易明细表' ROW_FORMAT = DYNAMIC;
+
+CREATE TABLE `ledger_tag`  (
+  `kid` int(11) NOT NULL AUTO_INCREMENT COMMENT '标签ID（主键）',
+  `instance_id` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '所属实例ID',
+  `name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '标签名称（如“日常用品”“工作餐”）',
+  `color` varchar(7) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '#333333' COMMENT '标签颜色（十六进制，如#FF0000）',
+  `create_time` bigint(19) NOT NULL COMMENT '创建时间',
+  `update_time` bigint(19) NOT NULL COMMENT '更新时间',
+  PRIMARY KEY (`kid`) USING BTREE,
+  UNIQUE INDEX `uk_instance_tag_name`(`instance_id`, `name`) USING BTREE COMMENT '同一实例下标签名称唯一',
+  INDEX `fk_tag_instance`(`instance_id`) USING BTREE,
+  CONSTRAINT `fk_tag_instance` FOREIGN KEY (`instance_id`) REFERENCES `ledger_instance` (`instance_id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 1000000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '标签表' ROW_FORMAT = DYNAMIC;
+
+CREATE TABLE `ledger_trantag`  (
+  `kid` int(11) NOT NULL AUTO_INCREMENT COMMENT '关联ID（主键）',
+  `transaction_id` int(11) NOT NULL COMMENT '关联交易ID',
+  `tag_id` int(11) NOT NULL COMMENT '关联标签ID',
+  `create_time` bigint(19) NOT NULL COMMENT '创建时间',
+  PRIMARY KEY (`kid`) USING BTREE,
+  UNIQUE INDEX `uk_transaction_tag`(`transaction_id`, `tag_id`) USING BTREE COMMENT '同一交易不能重复关联同一标签',
+  INDEX `fk_transaction_tag_tag`(`tag_id`) USING BTREE,
+  CONSTRAINT `fk_transaction_tag_tag` FOREIGN KEY (`tag_id`) REFERENCES `ledger_tag` (`kid`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_transaction_tag_transaction` FOREIGN KEY (`transaction_id`) REFERENCES `ledger_transaction` (`kid`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 1000000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '账单标签关联表' ROW_FORMAT = DYNAMIC;

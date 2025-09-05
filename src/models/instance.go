@@ -10,7 +10,7 @@ type OrmInstance struct {
 }
 
 func (OrmInstance) TableName() string {
-	return SetTableName("instance")
+	return TableNameInstance
 }
 func GetInstance(userId string) (OrmInstance, error) {
 	var instance OrmInstance
