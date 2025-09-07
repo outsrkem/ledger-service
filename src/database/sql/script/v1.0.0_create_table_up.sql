@@ -7,8 +7,8 @@ CREATE TABLE `ledger_instance`  (
   `user_id` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '所属用户ID',
   `create_time` bigint(19) NOT NULL COMMENT '创建时间',
   PRIMARY KEY (`kid`) USING BTREE,
-  UNIQUE INDEX `uk_instance_id`(`instance_id`) USING BTREE,
-  INDEX `fk_instance_user`(`user_id`) USING BTREE
+  UNIQUE INDEX `idx_unique_user_id`(`user_id`) USING BTREE,
+  UNIQUE INDEX `idx_unique_instance_id`(`instance_id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1000000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '记账实例表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
