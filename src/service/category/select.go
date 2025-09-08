@@ -18,7 +18,7 @@ type RespPayload struct {
 }
 
 // ConvertToTree 将OrmCategory列表转换为树形Payload结构
-func ConvertToTree(categories []*models.OrmCategory) []*RespPayload {
+func ConvertToTree(categories []*models.CategoryWithRelResult) []*RespPayload {
 	// 创建ID到Payload指针的映射
 	nodeMap := make(map[int64]*RespPayload)
 	var roots []*RespPayload
@@ -86,7 +86,7 @@ func SelectCategory() func(ctx context.Context, c *app.RequestContext) {
 
 		klog.Debugf("got instance id: %s", instanceId)
 
-		category, err := models.FindCategoryByUser(instanceId, query.Direction)
+		category, err := models.GetCategoryWithRel(instanceId, query.Direction)
 		if err != nil {
 			klog.Errorf("query category failed (dir: %d): %v", query.Direction, err)
 			c.JSON(http.StatusInternalServerError,

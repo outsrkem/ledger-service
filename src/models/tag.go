@@ -1,7 +1,5 @@
 package models
 
-import "ledger/src/database/mysql"
-
 type OrmTag struct {
 	Kid        int64  `gorm:"column:kid;primaryKey"` // 主键ID
 	InstanceId string `gorm:"column:instance_id"`
@@ -16,5 +14,5 @@ func (OrmTag) TableName() string {
 }
 
 func InstallTag(tag OrmTag) error {
-	return mysql.OrmDB.Create(&tag).Error
+	return db.Create(&tag).Error
 }
