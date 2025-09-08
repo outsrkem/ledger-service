@@ -12,10 +12,8 @@ import (
 	"gorm.io/gorm/schema"
 )
 
-var OrmDB *gorm.DB
-
 // InitDB initializes the database connection.
-func InitDB(cfg *cfgtypes.Ledger) {
+func InitDB(cfg *cfgtypes.Ledger) *gorm.DB {
 	dbcfg := cfg.Database
 	klog := slog.FromContext(nil)
 	// Construct the DSN string.
@@ -56,11 +54,12 @@ func InitDB(cfg *cfgtypes.Ledger) {
 
 		backoff += time.Second
 	}
+
 	_db, _ = db.DB()
 	_db.SetMaxOpenConns(50)               // 设置打开数据库链接的最大数量
 	_db.SetMaxIdleConns(5)                // 设置空闲连接池中链接的最大数量
 	_db.SetConnMaxLifetime(time.Hour * 2) // 最大连接有效时间，防止异常连接一直占用
 	_db.SetConnMaxIdleTime(time.Hour)     // 空闲连接如果持续xx时间没有被使用，就会被关闭
 
-	OrmDB = db
+	return db
 }

@@ -1,8 +1,6 @@
 package models
 
 import (
-	"ledger/src/database/mysql"
-
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
 )
@@ -25,13 +23,13 @@ func (OrmTransaction) TableName() string {
 
 // InstallTransaction 新增交易及明细
 func InstallTransaction(transaction *OrmTransaction) error {
-	return mysql.OrmDB.Create(&transaction).Error
+	return db.Create(&transaction).Error
 }
 
 // InstallTransactionAndDetail 新增交易及明细，返回主交易ID
 func InstallTransactionAndDetail(transaction *OrmTransaction, detail []*OrmDetail) error {
 	var transactionID int64 // 用于存储新增的transaction ID
-	err := mysql.OrmDB.Transaction(func(tx *gorm.DB) error {
+	err := db.Transaction(func(tx *gorm.DB) error {
 		// 1. 先创建主交易记录
 		if err := tx.Create(transaction).Error; err != nil {
 			return err
@@ -57,13 +55,13 @@ func InstallTransactionAndDetail(transaction *OrmTransaction, detail []*OrmDetai
 // FindTransactionForUser 按用户实例和id查询
 func FindTransactionForUser(instanceId string, transactionId int64) ([]*OrmTransaction, error) {
 	var detail []*OrmTransaction
-	r := mysql.OrmDB.Model(&OrmTransaction{}).
+	r := db.Model(&OrmTransaction{}).
 		Where("instance_id = ? AND kid = ?", instanceId, transactionId).Find(&detail)
 	return detail, r.Error
 }
 
 func DeleteTransaction(instanceId string, transactionId int64) error {
-	r := mysql.OrmDB.Model(&OrmTransaction{}).
+	r := db.Model(&OrmTransaction{}).
 		Where("instance_id = ? AND kid = ?", instanceId, transactionId).Delete(&OrmTransaction{})
 	return r.Error
 }
@@ -80,7 +78,7 @@ func UpdateTransaction(detail OrmTransaction) error {
 
 func FindTransactionAll(instanceId string, limit, offset int, count *int64) ([]*OrmTransaction, error) {
 	var detail []*OrmTransaction
-	err := mysql.OrmDB.Model(&OrmTransaction{}).
+	err := db.Model(&OrmTransaction{}).
 		Where("instance_id = ?", instanceId).
 		Count(count).Order("occ_time DESC").
 		Limit(limit).Offset(offset).

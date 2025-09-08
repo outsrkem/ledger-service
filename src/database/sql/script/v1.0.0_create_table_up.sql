@@ -1,7 +1,7 @@
 -- ----------------------------
 -- Table structure for ledger_instance
 -- ----------------------------
-CREATE TABLE `ledger_instance`  (
+CREATE TABLE IF NOT EXISTS `ledger_instance`  (
   `kid` int(11) NOT NULL AUTO_INCREMENT COMMENT '实例ID（主键）',
   `instance_id` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `user_id` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '所属用户ID',
@@ -14,7 +14,7 @@ CREATE TABLE `ledger_instance`  (
 -- ----------------------------
 -- Table structure for ledger_budget
 -- ----------------------------
-CREATE TABLE `ledger_budget`  (
+CREATE TABLE IF NOT EXISTS `ledger_budget`  (
   `kid` int(11) NOT NULL AUTO_INCREMENT COMMENT '预算ID（主键）',
   `instance_id` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '所属实例ID',
   `category_id` int(11) NOT NULL COMMENT '关联分类ID',
@@ -32,25 +32,38 @@ CREATE TABLE `ledger_budget`  (
 -- ----------------------------
 -- Table structure for ledger_category
 -- ----------------------------
-CREATE TABLE `ledger_category`  (
+CREATE TABLE IF NOT EXISTS `ledger_category`  (
   `kid` int(11) NOT NULL AUTO_INCREMENT COMMENT '分类ID（主键）',
   `instance_id` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '所属实例ID',
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '分类名称（如“餐饮”“工资”）',
   `direction` tinyint(4) NOT NULL COMMENT '类型（1=收入，2=支出）',
-  `pid` int(11) NULL DEFAULT NULL COMMENT '父分类ID（二级分类用）',
+  `layer` tinyint(1) NOT NULL COMMENT '1大类，2子类',
   `create_time` bigint(19) NOT NULL COMMENT '创建时间',
   PRIMARY KEY (`kid`) USING BTREE,
   UNIQUE INDEX `uk_instance_category_direction`(`instance_id`, `name`, `direction`) USING BTREE,
   INDEX `fk_category_instance`(`instance_id`) USING BTREE,
-  INDEX `fk_category_pid`(`pid`) USING BTREE,
-  CONSTRAINT `fk_category_instance` FOREIGN KEY (`instance_id`) REFERENCES `ledger_instance` (`instance_id`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_category_pid` FOREIGN KEY (`pid`) REFERENCES `ledger_category` (`kid`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_category_instance` FOREIGN KEY (`instance_id`) REFERENCES `ledger_instance` (`instance_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1000000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '收支分类表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Table structure for ledger_caterela
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS `ledger_caterela`  (
+  `kid` int(11) NOT NULL AUTO_INCREMENT,
+  `parent_id` int(11) NOT NULL COMMENT '父项ID',
+  `child_id` int(11) NOT NULL COMMENT '子项ID',
+  `create_time` bigint(19) NOT NULL,
+  PRIMARY KEY (`kid`) USING BTREE,
+  UNIQUE INDEX `uk_projrela_parent_child`(`parent_id`, `child_id`) USING BTREE COMMENT '避免重复关联',
+  INDEX `idx_projrela_child`(`child_id`) USING BTREE COMMENT '通过子项目查父项目',
+  CONSTRAINT `fk_projrela_child` FOREIGN KEY (`child_id`) REFERENCES `ledger_category` (`kid`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_projrela_parent` FOREIGN KEY (`parent_id`) REFERENCES `ledger_category` (`kid`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 1000000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for ledger_transaction
 -- ----------------------------
-CREATE TABLE `ledger_transaction`  (
+CREATE TABLE IF NOT EXISTS `ledger_transaction`  (
   `kid` int(11) NOT NULL AUTO_INCREMENT COMMENT '交易ID（主键）',
   `instance_id` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '所属实例ID',
   `category_id` int(11) NOT NULL COMMENT '关联分类ID',
@@ -70,7 +83,7 @@ CREATE TABLE `ledger_transaction`  (
 -- ----------------------------
 -- Table structure for ledger_detail
 -- ----------------------------
-CREATE TABLE `ledger_detail`  (
+CREATE TABLE IF NOT EXISTS `ledger_detail`  (
   `kid` int(11) NOT NULL AUTO_INCREMENT COMMENT '明细ID（主键）',
   `transaction_id` int(11) NOT NULL COMMENT '关联交易ID',
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '物品名称（如“牛奶”）',
@@ -83,7 +96,10 @@ CREATE TABLE `ledger_detail`  (
   CONSTRAINT `fk_detail_transaction` FOREIGN KEY (`transaction_id`) REFERENCES `ledger_transaction` (`kid`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1000000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '交易明细表' ROW_FORMAT = DYNAMIC;
 
-CREATE TABLE `ledger_tag`  (
+-- ----------------------------
+-- Table structure for ledger_tag
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS `ledger_tag`  (
   `kid` int(11) NOT NULL AUTO_INCREMENT COMMENT '标签ID（主键）',
   `instance_id` char(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '所属实例ID',
   `name` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '标签名称（如“日常用品”“工作餐”）',
@@ -96,7 +112,10 @@ CREATE TABLE `ledger_tag`  (
   CONSTRAINT `fk_tag_instance` FOREIGN KEY (`instance_id`) REFERENCES `ledger_instance` (`instance_id`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1000000 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '标签表' ROW_FORMAT = DYNAMIC;
 
-CREATE TABLE `ledger_trantag`  (
+-- ----------------------------
+-- Table structure for ledger_trantag
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS `ledger_trantag`  (
   `kid` int(11) NOT NULL AUTO_INCREMENT COMMENT '关联ID（主键）',
   `transaction_id` int(11) NOT NULL COMMENT '关联交易ID',
   `tag_id` int(11) NOT NULL COMMENT '关联标签ID',
