@@ -49,6 +49,16 @@ func FindCategoryByType(t string) ([]*OrmCategory, error) {
 	return category, err
 }
 
+// FindCategoryById 按kid查询分类
+func FindCategoryById(instanceId string, kid int64) (*OrmCategory, error) {
+	var category *OrmCategory
+	r := db.Model(&OrmCategory{}).
+		Where("instance_id is NULL OR instance_id = ?", instanceId).
+		Where("kid = ?", kid).
+		First(&category)
+	return category, r.Error
+}
+
 // FindCategoryByUser 按类型查询用户的所有分类
 func FindCategoryByUser(instanceId string, Direction int8) ([]*OrmCategory, error) {
 	var category []*OrmCategory
@@ -59,7 +69,7 @@ func FindCategoryByUser(instanceId string, Direction int8) ([]*OrmCategory, erro
 	return category, r.Error
 }
 
-// GetCategoryWithRel 关联查询分类（修复表别名问题）
+// GetCategoryWithRel 关联查询分类
 func GetCategoryWithRel(instanceId string, direction int8) ([]*CategoryWithRelResult, error) {
 	var results []*CategoryWithRelResult
 
@@ -97,8 +107,10 @@ func CreateCategory(category *OrmCategory, rela *OrmCaterela) (int64, error) {
 }
 
 // DeleteCategory 删除分类
-func DeleteCategory(ids []int) (int64, error) {
-	r := db.Model(&OrmCategory{}).Where("kid IN (?)", ids).Delete(&OrmCategory{})
+func DeleteCategory(instanceId string, ids []int64) (int64, error) {
+	r := db.Model(&OrmCategory{}).
+		Where("instance_id = ?", instanceId).
+		Where("kid IN (?)", ids).Delete(&OrmCategory{})
 	return r.RowsAffected, r.Error
 }
 
