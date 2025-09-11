@@ -29,7 +29,7 @@ func AppRoute(h *server.Hertz) {
 
 	h.POST("/v1/category/main", apc("ledger:category:create"), category.CreateCategoryMain())           // 添加主分类 √
 	h.POST("/v1/category/:categoryId/sub", apc("ledger:category:create"), category.CreateCategorySub()) // 添加子分类 √
-	h.DELETE("/v1/category/:id", apc("ledger:category:delete"), category.DeleteCategory())              // 删除分类
+	h.DELETE("/v1/category/:kid", apc("ledger:category:delete"), category.DeleteCategory())             // 删除分类
 	h.GET("/v1/category", apc("ledger:category:list"), category.SelectCategory())                       // 查询分类 √
 	h.PATCH("/v1/category/:id", apc("ledger:category:update"), category.UpdateCategory())               // 修改分类
 

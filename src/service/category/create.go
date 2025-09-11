@@ -2,6 +2,7 @@ package category
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"ledger/src/models"
 	"ledger/src/pkg/answer"
@@ -12,6 +13,7 @@ import (
 	"strconv"
 
 	"github.com/cloudwego/hertz/pkg/app"
+	"gorm.io/gorm"
 )
 
 type Category struct {
@@ -73,6 +75,7 @@ func strToInt64(s string) int64 {
 	return num
 }
 
+// CreateCategorySub 添加子分类
 func CreateCategorySub() func(ctx context.Context, c *app.RequestContext) {
 	return func(ctx context.Context, c *app.RequestContext) {
 		klog := slog.FromContext(c)
@@ -89,10 +92,26 @@ func CreateCategorySub() func(ctx context.Context, c *app.RequestContext) {
 
 		instanceId, err := instance.GetInstanceId(userId)
 		if err != nil {
-			klog.Errorf("get instance id failed  %v", err)
+			klog.Errorf("get instance id failed %v", err)
 			c.JSON(http.StatusBadRequest,
 				answer.ResBody(answer.EcodeInvalidRequestError,
 					"Failed to get your account info. Try again later.", ""))
+			return
+		}
+		categ, err := models.FindCategoryById(instanceId, strToInt64(categoryId))
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				klog.Errorf("category not found %v", err)
+				c.JSON(http.StatusBadRequest,
+					answer.ResBody(answer.EcodeInvalidRequestError,
+						"category not found.", nil))
+				return
+			}
+
+			klog.Errorf("find category by id failed %v", err)
+			c.JSON(http.StatusBadRequest,
+				answer.ResBody(answer.EcodeInvalidRequestError,
+					"Failed to get your account info. Try again later.", nil))
 			return
 		}
 
@@ -100,7 +119,7 @@ func CreateCategorySub() func(ctx context.Context, c *app.RequestContext) {
 		cate := &models.OrmCategory{
 			InstanceId: instanceId,
 			Name:       reqData.Name,
-			Direction:  reqData.Direction,
+			Direction:  categ.Direction, // 二级分类要根据父类继承Direction
 			Layer:      2,
 			CreateTime: now,
 		}
