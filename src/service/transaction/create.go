@@ -1,4 +1,4 @@
-package detail
+package transaction
 
 import (
 	"context"
@@ -14,22 +14,24 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-type ReqDetail struct {
+// Detail 账目明细
+type Detail struct {
+	Name     string          `json:"name"`     // 物品名称（如“牛奶”）
+	Quantity decimal.Decimal `json:"quantity"` // 数目（如：2件商品、2次服务）
+	Price    decimal.Decimal `json:"price"`    // 单价
+	Unit     string          `json:"unit"`     // 单位
+	Total    decimal.Decimal `json:"total"`    // 总价（数目 × 单价，与原 amount 绝对值匹配）
+	Remark   string          `json:"cremark"`  // 详细备注
+}
+
+// ReqTransaction 请求数据
+type ReqTransaction struct {
 	Cid     int64           `json:"cid"`      // 类型ID
 	OccTime string          `json:"occ_time"` // 发生的时间ISO 8601, 20220909T18:47:66+0800
 	Amount  decimal.Decimal `json:"amount"`   // 金额 0.0000
 	Remark  string          `json:"remark"`   // 备注
 	Total   int8            `json:"total"`    // 是否计入本月收支，1：计入；0：不计入
 	Detail  []*Detail       `json:"detail"`
-}
-
-// Detail 账目明细
-type Detail struct {
-	Name     string          `json:"name"`     // 物品名称（如“牛奶”）
-	Quantity int             `json:"quantity"` // 数目（如：2件商品、2次服务）
-	Price    decimal.Decimal `json:"price"`    // 单价
-	Total    decimal.Decimal `json:"total"`    // 总价（数目 × 单价，与原 amount 绝对值匹配）
-	Remark   string          `json:"cremark"`  // 详细备注
 }
 
 // 转换时间字符串为毫秒时间戳
@@ -52,7 +54,7 @@ func CreateTransaction() func(ctx context.Context, c *app.RequestContext) {
 	return func(ctx context.Context, c *app.RequestContext) {
 		klog := slog.FromContext(c)
 		userId := c.GetString("userId")
-		var ReqData ReqDetail
+		var ReqData ReqTransaction
 		if err := c.BindJSON(&ReqData); err != nil {
 			klog.Errorf("bind json failed %v", err)
 			c.JSON(http.StatusBadRequest,
@@ -100,6 +102,7 @@ func CreateTransaction() func(ctx context.Context, c *app.RequestContext) {
 					Name:     val.Name,
 					Quantity: val.Quantity,
 					Price:    val.Price,
+					Unit:     val.Unit,
 					Total:    val.Total,
 				})
 			}

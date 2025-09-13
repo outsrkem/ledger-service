@@ -88,6 +88,7 @@ CREATE TABLE IF NOT EXISTS `ledger_detail`  (
   `transaction_id` int(11) NOT NULL COMMENT '关联交易ID',
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '物品名称（如“牛奶”）',
   `quantity` decimal(10, 4) NOT NULL COMMENT '数量（支持小数）',
+  `unit` varchar(10) NOT NULL COMMENT '单位',
   `price` decimal(10, 4) NOT NULL COMMENT '单价',
   `total` decimal(10, 4) NOT NULL COMMENT '该项总价',
   `remark` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '明细备注（如“促销装”）',

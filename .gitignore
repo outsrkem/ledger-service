@@ -21,3 +21,5 @@ output/
 # vendor/
 logs/
 develop/
+
+web/stats.html

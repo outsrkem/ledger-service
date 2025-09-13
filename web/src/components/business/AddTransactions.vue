@@ -72,17 +72,22 @@
                         <el-input
                             v-model="row.name"
                             placeholder="请输入物品名称"
-                            style="width: 30%; margin-right: 1%"
+                            style="width: 20%; margin-right: 1%"
                             @input="calculateTotal(index)"
                         ></el-input>
 
                         <el-input
-                            v-model.number="row.quantity"
+                            v-model="row.quantity"
                             placeholder="请输入数量"
                             style="width: 15%; margin-right: 1%"
                             @input="calculateTotal(index)"
                         ></el-input>
-
+                        <el-select v-model="row.unit" placeholder="单位" filterable allow-create style="width: 10%; margin-right: 1%">
+                            <el-option label="斤" value="斤" />
+                            <el-option label="克" value="克" />
+                            <el-option label="个" value="个" />
+                            <el-option label="份" value="份" />
+                        </el-select>
                         <el-input
                             v-model="row.price"
                             placeholder="请输入单价"
@@ -150,7 +155,10 @@ export default {
             activeRowIndex: -1, // 当前激活的父分类行索引
             formRules: {
                 occ_time: [{ required: true, type: "string", message: "请选择时间", trigger: ["blur", "change"] }],
-                amount: [{ required: true, message: "请输入金额", trigger: ["blur", "change"] }],
+                amount: [
+                    { required: true, message: "请输入金额", trigger: ["blur"] },
+                    { pattern: /(^[1-9]([0-9]+)?(\.[0-9]{1,4})?$)|(^(0){1}$)|(^[0-9]\.[0-9]{1,3}?$)/, message: "请输入正确额格式,可保留四位小数" },
+                ],
                 category: [{ required: true, message: "请选择类别", trigger: ["blur", "change"] }],
             },
         };
@@ -198,7 +206,6 @@ export default {
                     resolve(valid);
                 });
             });
-
             // 验证明细行
             if (this.detailRows.length > 0) {
                 for (let i = 0; i < this.detailRows.length; i++) {
@@ -209,6 +216,10 @@ export default {
                     }
                     if (row.quantity === null || isNaN(Number(row.quantity)) || Number(row.quantity) <= 0) {
                         this.$message.error(`第${i + 1}行明细：请输入有效的个数`);
+                        return false;
+                    }
+                    if (row.unit === null || row.unit === "") {
+                        this.$message.error(`第${i + 1}行明细：请输入有效的单位`);
                         return false;
                     }
                     if (row.price === null || isNaN(Number(row.price)) || Number(row.price) <= 0) {
@@ -243,6 +254,7 @@ export default {
                 quantity: Number(row.quantity), // 转换为数字
                 price: Number(row.price), // 转换为数字
                 total: Number(row.total), // 转换为数字
+                unit: row.unit,
             }));
 
             // 准备提交的数据，包含格式化后的明细
