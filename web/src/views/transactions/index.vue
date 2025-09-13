@@ -15,7 +15,17 @@
             </template>
             <el-table :data="transactions" style="width: 100%" v-loading="loading">
                 <el-table-column prop="category_title" label="类别" />
-                <el-table-column prop="amount" label="金额" />
+                <el-table-column label="金额(¥)">
+                    <template #default="scope">
+                        <span
+                            :style="{
+                                color: scope.row.amount > 0 ? 'red' : scope.row.amount < 0 ? 'green' : 'black',
+                            }"
+                        >
+                            {{ scope.row.amount }}
+                        </span>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="remark" label="备注" />
                 <el-table-column prop="create_time" label="交易时间" width="200">
                     <template #default="scope">{{ formatDate(scope.row.occ_time) }}</template>

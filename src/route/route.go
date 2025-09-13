@@ -3,8 +3,8 @@ package route
 import (
 	"context"
 	"ledger/src/service/category"
-	"ledger/src/service/detail"
 	"ledger/src/service/tag"
+	"ledger/src/service/transaction"
 	"net/http"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -33,10 +33,10 @@ func AppRoute(h *server.Hertz) {
 	h.GET("/v1/category", apc("ledger:category:list"), category.SelectCategory())                       // 查询分类 √
 	h.PATCH("/v1/category/:id", apc("ledger:category:update"), category.UpdateCategory())               // 修改分类
 
-	h.POST("/v1/transactions", apc("ledger:transaction:create"), detail.CreateTransaction())       // 添加记账流水 √
-	h.GET("/v1/transactions", apc("ledger:transaction:list"), detail.SelectTransaction())          // 查询记账流水 √
-	h.PATCH("/v1/transactions/:id", apc("ledger:transaction:update"), helloWorld())                // 修改
-	h.DELETE("/v1/transactions/:id", apc("ledger:transaction:delete"), detail.DeleteTransaction()) // 删除 √
+	h.POST("/v1/transactions", apc("ledger:transaction:create"), transaction.CreateTransaction())       // 添加记账流水 √
+	h.GET("/v1/transactions", apc("ledger:transaction:list"), transaction.SelectTransaction())          // 查询记账流水 √
+	h.PATCH("/v1/transactions/:id", apc("ledger:transaction:update"), helloWorld())                     // 修改
+	h.DELETE("/v1/transactions/:id", apc("ledger:transaction:delete"), transaction.DeleteTransaction()) // 删除 √
 
 	h.POST("/v1/tag", apc("ledger:tag:create"), tag.CreateTag()) // 创建标签 √
 
