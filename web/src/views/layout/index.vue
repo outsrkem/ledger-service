@@ -1,31 +1,30 @@
 <template>
-    <div class="admin-layout">
+    <div class="main-container">
+        <!-- 顶部导航 -->
         <header class="header-content">
             <div class="header-left">
-                <el-space :size="10" spacer="">
-                    <span style="padding-left: 160px"></span>
-                    <el-icon class="console-icon"><Menu /></el-icon>
-                    <el-link class="console-name" href="/console">控制台</el-link>
-                </el-space>
+                <div class="header-left-wrap">
+                    <el-link class="console-name" href="/console">
+                        <el-icon class="console-icon"><Menu /></el-icon>
+                        <span class="console-text">控制台</span>
+                    </el-link>
+                </div>
             </div>
+
             <div class="header-right">
                 <span>{{ dateMessage }}</span>
                 <span>欢迎您，{{ displayedName }}</span>
-                <div>
-                    <el-button size="default" link @click="onUserCenter">个人信息</el-button>
-                </div>
-                <div>
-                    <el-button size="default" link @click="Logout">退出</el-button>
-                </div>
+                <el-button link @click="onUserCenter">个人信息</el-button>
+                <el-button link @click="logout">退出</el-button>
             </div>
         </header>
-        <!-- 2. 主体内容区（左右分栏） -->
+
+        <!-- 主体布局 -->
         <div class="admin-main">
             <aside class="admin-sidebar">
                 <app-aside />
             </aside>
             <main class="admin-content">
-                <!-- 子路由出口 -->
                 <router-view />
             </main>
         </div>
@@ -34,86 +33,93 @@
 
 <script>
 import AppAside from "./aside.vue";
-import { toLoginPage, toUserCenter, toConsole } from "../../utils/common.js";
+import { toLoginPage, toUserCenter } from "../../utils/common.js";
 import { logout, basicInfo } from "../../api/basic.js";
+
 export default {
     name: "LayoutIndex",
-    components: {
-        AppAside,
-    },
-    props: {},
+    components: { AppAside },
+
     data() {
         return {
-            userInfo: {},
-            breadcrumb: [], // 面包屑导航
-            dateMessage: "",
+            userInfo: { username: "", account: "" }, // 用户信息
+            dateMessage: "", // 顶部日期文案
         };
     },
+
     computed: {
+        // 拼接显示用户名+账号
         displayedName() {
-            return this.userInfo.username + "(" + this.userInfo.account + ")";
+            const { username = "", account = "" } = this.userInfo;
+            return `${username}(${account})`;
         },
     },
+
     methods: {
-        LoadLogOut: async function () {
-            await logout().then(() => {
-                window.sessionStorage.removeItem("active-path");
+        // 获取用户基础信息
+        async getBasicInfo() {
+            try {
+                const res = await basicInfo();
+                this.userInfo = res.payload?.userinfo || {};
+            } catch (err) {
+                console.error("获取用户信息失败:", err);
+            }
+        },
+
+        // 退出登录
+        async logout() {
+            try {
+                await logout();
+                sessionStorage.removeItem("active-path");
                 this.$cookies.remove("session");
                 toLoginPage();
-            });
+            } catch (err) {
+                console.error("退出登录失败:", err);
+            }
         },
-        GetbasicInfo: async function () {
-            const res = await basicInfo();
-            this.userInfo = res.payload.userinfo;
-        },
-        Logout() {
-            this.LoadLogOut();
-        },
+
+        // 前往个人中心
         onUserCenter() {
             toUserCenter();
         },
-        onConsole() {
-            toConsole();
-        },
-        CurrentTime() {
-            // 返回一个对象，包含日期、时间和星期几
+
+        // 格式化顶部日期
+        getCurrentTime() {
             const now = new Date();
             const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, "0"); // 月份是从0开始的，所以要+1
+            const month = String(now.getMonth() + 1).padStart(2, "0");
             const day = String(now.getDate()).padStart(2, "0");
-            // const hours = String(now.getHours()).padStart(2, "0");
-            // const minutes = String(now.getMinutes()).padStart(2, "0");
-            // const seconds = String(now.getSeconds()).padStart(2, "0");
-            const weekdays = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
-            const _weekday = weekdays[now.getDay()];
-            this.dateMessage = `今天是${year}年${month}月${day}日 ${_weekday}`;
+            const week = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+            this.dateMessage = `今天是${year}年${month}月${day}日 ${week[now.getDay()]}`;
         },
     },
+
     created() {
-        this.GetbasicInfo();
-        this.CurrentTime();
+        this.getBasicInfo();
+        this.getCurrentTime();
     },
 };
 </script>
 
 <style scoped lang="less">
-.admin-layout {
+/* 整体布局 */
+.main-container {
+    min-width: 1366px;
+    height: 100vh;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
-    margin: 0; /* 清除body默认margin导致的留白 */
-    padding: 0;
-    min-width: 1200px;
+    overflow: visible;
 }
 
+/* 顶部导航 */
 .header-content {
     height: 50px;
     padding: 0 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #ffffff;
+    background: #fff;
     border-bottom: 1px solid #e5e7eb;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
@@ -121,7 +127,11 @@ export default {
 .header-left {
     display: flex;
     align-items: center;
-    gap: 8px; /* 图标与文字间距 */
+    gap: 8px;
+}
+
+.header-left-wrap {
+    padding-left: 170px;
 }
 
 .console-icon {
@@ -132,51 +142,72 @@ export default {
 .console-name {
     font-size: 17px;
     font-weight: 500;
-    color: #333333;
+    color: #333;
+}
+
+.console-text {
+    margin-left: 10px;
 }
 
 .header-right {
     display: flex;
     align-items: center;
-    gap: 12px; /* 文字与按钮间距 */
-    color: #666666;
+    gap: 12px;
+    color: #666;
     font-size: 14px;
 }
 
+/* 主体内容区 */
 .admin-main {
     display: flex;
     flex: 1;
     overflow: hidden;
-    flex-grow: 1;
 }
 
-/* 左侧菜单样式（默认白色） */
+/* 左侧菜单 */
 .admin-sidebar {
-    width: 200px; /* 固定菜单宽度 */
-    background-color: #ffffff; /* 菜单默认白色 */
-    border-right: 1px solid #e5e7eb; /* 右侧分隔线 */
+    width: 200px;
+    background: #fff;
+    border-right: 1px solid #e5e7eb;
+    overflow-y: overlay;
+
+    &::-webkit-scrollbar {
+        width: 2px;
+        height: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+        border-radius: 2px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: #e0e0e0;
+        border-radius: 2px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: #d0d0d0;
+    }
 }
 
-/* 右侧内容区样式（灰色底色） */
+/* 右侧内容 */
 .admin-content {
-    flex: 1; /* 占满剩余宽度 */
-    background-color: #f9fafb; /* 灰色底色 */
-    padding: 10px; /* 内边距，避免内容贴边 */
-    overflow-y: auto; /* 内容超出时仅右侧出现垂直滚动条 */
-    height: 100%; /* 强制占满主体区高度 */
+    flex: 1;
+    background: #f9fafb;
+    padding: 15px;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
-/* 4. 修复移动端菜单宽度：避免菜单过宽导致横向滚动 */
+/* 移动端适配 */
 @media (max-width: 768px) {
     .admin-sidebar {
-        width: auto; /* 移动端缩小菜单宽度，适配小屏幕 */
-    }
-    .system-name {
-        font-size: 14px; /* 缩小页眉文字，避免换行 */
+        width: auto;
     }
     .admin-content {
-        background-color: #fff; /* 设置白底 */
-        padding: 0px; /* 取消边距 */
+        background: #fff;
+        padding: 0;
     }
 }
 </style>

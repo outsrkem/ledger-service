@@ -5,17 +5,12 @@ export default {
             size: "default", // 可选值: large/default/small
         };
     },
-    created() {
-        this.$globalBus.on("element-size", (data) => {
-            this.size = data ?? "default";
-            window.localStorage.setItem("element-size", this.size);
-        });
-    },
+    created() {},
 };
 </script>
 
 <template>
-    <el-config-provider :size="size">
+    <el-config-provider size="default">
         <div>
             <router-view />
         </div>

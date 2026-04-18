@@ -13,6 +13,7 @@
     "dayjs": "^1.11.13",
     "element-plus": "^2.11.1",
     "mitt": "^3.0.1",
+    "vant": "^4.9.22",
     "vue": "^3.5.18",
     "vue-cookies": "^1.8.6",
     "vue-router": "^4.5.1"
