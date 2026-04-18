@@ -19,13 +19,6 @@
                 </el-menu>
             </el-aside>
         </div>
-        <div style="padding: 20px">
-            <el-button-group class="ml-4" size="small">
-                <el-button :type="size.x" @click="onSetSize('small')">小</el-button>
-                <el-button :type="size.z" @click="onSetSize('default')">中</el-button>
-                <el-button :type="size.d" @click="onSetSize('large')">大</el-button>
-            </el-button-group>
-        </div>
     </div>
 </template>
 
@@ -37,7 +30,6 @@ export default {
     data() {
         return {
             activePath: "",
-            size: { x: "", z: "primary", d: "" },
         };
     },
     computed: {},
@@ -46,22 +38,11 @@ export default {
         OnSwitchRoutes(activePath) {
             this.$router.push({ path: activePath });
         },
-        // 设置元素尺寸
-        onSetSize(size) {
-            this.$globalBus.emit("element-size", size);
-            const sizeConfigMap = {
-                small: { x: "primary", z: "", d: "" },
-                default: { x: "", z: "primary", d: "" },
-                large: { x: "", z: "", d: "primary" },
-            };
-            this.size = sizeConfigMap[size] || sizeConfigMap.default;
-        },
     },
     created() {
         this.$globalBus.on("updateActivePath", (data) => {
             this.activePath = data || "/";
         });
-        this.onSetSize(window.localStorage.getItem("element-size")); // 加载默认元素尺寸
     },
 };
 </script>

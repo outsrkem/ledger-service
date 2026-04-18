@@ -71,14 +71,14 @@
                     <div v-for="(row, index) in detailRows" :key="row.id" class="detail-row">
                         <el-input
                             v-model="row.name"
-                            placeholder="请输入物品名称"
+                            placeholder="物品名称"
                             style="width: 20%; margin-right: 1%"
                             @input="calculateTotal(index)"
                         ></el-input>
 
                         <el-input
                             v-model="row.quantity"
-                            placeholder="请输入数量"
+                            placeholder="数量"
                             style="width: 15%; margin-right: 1%"
                             @input="calculateTotal(index)"
                         ></el-input>
@@ -90,7 +90,7 @@
                         </el-select>
                         <el-input
                             v-model="row.price"
-                            placeholder="请输入单价"
+                            placeholder="单价"
                             style="width: 15%; margin-right: 1%"
                             @input="calculateTotal(index)"
                         ></el-input>

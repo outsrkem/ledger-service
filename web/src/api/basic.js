@@ -21,3 +21,5 @@ export const GetTransactions = (params) => ajax("/api/ledger/v1/transactions", "
 export const AddTransactions = (data) => ajax("/api/ledger/v1/transactions", "POST", null, data);
 export const DelTransactions = (id) => ajax(`/api/ledger/v1/transactions/${id}`, "DELETE", null, null);
 export const Getcategory = (params) => ajax("/api/ledger/v1/category", "GET", params, null);
+export const GetStatistic = (params) => ajax("/api/ledger/v1/bill/statistic", "GET", params, null);
+export const GetBillDetails = (id) => ajax(`/api/ledger/v1/bill/${id}`, "GET", null, null);

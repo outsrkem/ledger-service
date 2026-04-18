@@ -13,40 +13,44 @@
                     </el-row>
                 </div>
             </template>
-            <el-table :data="transactions" style="width: 100%" v-loading="loading">
-                <el-table-column prop="category_title" label="类别" />
-                <el-table-column label="金额(¥)">
-                    <template #default="scope">
-                        <span
-                            :style="{
-                                color: scope.row.amount > 0 ? 'red' : scope.row.amount < 0 ? 'green' : 'black',
-                            }"
-                        >
-                            {{ scope.row.amount }}
-                        </span>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="remark" label="备注" />
-                <el-table-column prop="create_time" label="交易时间" width="200">
-                    <template #default="scope">{{ formatDate(scope.row.occ_time) }}</template>
-                </el-table-column>
-                <el-table-column width="300" label="操作">
-                    <template #default="scope">
-                        <el-button link type="primary" @click="onDetail(scope.row)">查看详情</el-button>
-                        <el-button link type="primary" @click="onUpdate(scope.row)">修改</el-button>
-                        <el-popconfirm
-                            class="box-item"
-                            :title="`删除：${scope.row.amount}`"
-                            placement="left-end"
-                            @confirm="onDeleteTransactions(scope.row)"
-                        >
-                            <template #reference>
-                                <el-button link type="primary">删除</el-button>
-                            </template>
-                        </el-popconfirm>
-                    </template>
-                </el-table-column>
-            </el-table>
+
+            <!-- 只替换这里：原生el-table → MyTable，其余完全不变 -->
+            <MyTable :data="transactions" :columns="columns" v-loading="loading">
+                <!-- 交易时间插槽 -->
+                <template #occ_time="{ row }">
+                    {{ formatDate(row.occ_time) }}
+                </template>
+                <!-- 类别插槽 -->
+                <template #category_title="{ row }">
+                    {{ row.category_title }}
+                </template>
+                <!-- 金额插槽 -->
+                <template #amount="{ row }">
+                    <span
+                        :style="{
+                            color: row.amount > 0 ? 'red' : row.amount < 0 ? 'green' : 'black',
+                        }"
+                    >
+                        {{ row.amount }}
+                    </span>
+                </template>
+
+                <!-- 备注插槽 -->
+                <template #remark="{ row }">
+                    {{ row.remark }}
+                </template>
+                <!-- 操作插槽 -->
+                <template #action="{ row }">
+                    <el-button link type="primary" @click="onDetail(row)">查看详情</el-button>
+                    <el-button link type="primary" @click="onUpdate(row)">修改</el-button>
+                    <el-popconfirm class="box-item" :title="`删除：${row.amount}`" placement="left-end" @confirm="onDeleteTransactions(row)">
+                        <template #reference>
+                            <el-button link type="primary">删除</el-button>
+                        </template>
+                    </el-popconfirm>
+                </template>
+            </MyTable>
+
             <div class="pagination">
                 <pagination :pageTotal="pageTotal" :pageSize="pageSize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange" />
             </div>
@@ -56,6 +60,7 @@
 </template>
 
 <script>
+import MyTable from "../../components/MyTable/MyTable.vue";
 import { msgcon } from "../../utils/message.js";
 import { GetTransactions, Getcategory, DelTransactions } from "../../api/basic.js";
 import { withDelay, convertToLimitOffset } from "../../utils/common.js";
@@ -64,6 +69,9 @@ import { Refresh } from "@element-plus/icons-vue";
 import { formatTime } from "../../utils/date.js";
 export default {
     name: "TransactionsIndex",
+    components: {
+        MyTable,
+    },
     setup() {
         return {
             Refresh,
@@ -77,6 +85,14 @@ export default {
             page: 1,
             transactions: [{}, {}, {}],
             category: [],
+            // 新增列配置，对应MyTable
+            columns: [
+                { label: "交易时间", slot: "occ_time" },
+                { label: "类别", slot: "category_title" },
+                { label: "金额(¥)", slot: "amount" },
+                { label: "备注", slot: "remark" },
+                { label: "操作", slot: "action" },
+            ],
         };
     },
     methods: {
@@ -122,6 +138,9 @@ export default {
         },
         // 查看详情
         onDetail(val) {
+            console.log(val);
+        },
+        onUpdate(val) {
             console.log(val);
         },
         onDeleteTransactions(val) {
