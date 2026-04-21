@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"ledger/src/config"
+	"ledger/src/pkg/answer"
 	"ledger/src/pkg/uuid"
+	"ledger/src/service/instance"
 	"ledger/src/slog"
 	"time"
 
@@ -85,8 +87,17 @@ func apc(action string) app.HandlerFunc {
 			return
 		}
 
+		instanceId, err := instance.GetInstanceId(resp.Payload.User.Id)
+		if err != nil {
+			klog.Errorf("Error getting instance id: %v", err)
+			c.JSON(404, answer.ResBody(answer.EcodeOK, "No instance found.", nil))
+			c.Abort()
+			return
+		}
+
 		klog.Info("Permission is granted, and the operation is authorized.")
 		c.Set("domainId", resp.Payload.User.Domain.Id)
+		c.Set("instanceId", instanceId)
 		c.Set("domainName", resp.Payload.User.Domain.Name)
 		c.Set("userId", resp.Payload.User.Id)
 		c.Set("account", resp.Payload.User.Name.Account)

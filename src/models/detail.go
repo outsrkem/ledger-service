@@ -4,7 +4,7 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-// OrmTransaction 明细详情
+// OrmDetail 明细详情
 type OrmDetail struct {
 	Kid           int64           `gorm:"column:kid;primaryKey"` // 主键ID
 	TransactionId int64           `gorm:"column:transaction_id"` // 交易ID
@@ -18,4 +18,14 @@ type OrmDetail struct {
 
 func (OrmDetail) TableName() string {
 	return TableNameDetail
+}
+
+// GetDetail 查询明细
+func GetDetail(billId int64) ([]*OrmDetail, error) {
+	var detail []*OrmDetail
+	err := db.Model(&OrmDetail{}).
+		Where("transaction_id = ?", billId).
+		Find(&detail).Error
+
+	return detail, err
 }

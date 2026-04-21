@@ -3,6 +3,7 @@ package route
 import (
 	"context"
 	"ledger/src/service/category"
+	"ledger/src/service/statistic"
 	"ledger/src/service/tag"
 	"ledger/src/service/transaction"
 	"net/http"
@@ -38,7 +39,9 @@ func AppRoute(h *server.Hertz) {
 	h.PATCH("/v1/transactions/:id", apc("ledger:transaction:update"), helloWorld())                     // 修改
 	h.DELETE("/v1/transactions/:id", apc("ledger:transaction:delete"), transaction.DeleteTransaction()) // 删除 √
 
+	h.GET("/v1/bill/:id", apc("ledger:transaction:list"), transaction.BillDetails()) // 账单详情ledger:bill:get
+
 	h.POST("/v1/tag", apc("ledger:tag:create"), tag.CreateTag()) // 创建标签 √
 
-	h.GET("/v1/finances/statistics", apc(""), helloWorld()) // 统计收支
+	h.GET("/v1/bill/statistic", apc("ledger:transaction:list"), statistic.StatOve()) // 统计收支,年，月，自定义
 }
