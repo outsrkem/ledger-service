@@ -176,3 +176,103 @@ func SelectTransaction() func(ctx context.Context, c *app.RequestContext) {
 		c.JSON(http.StatusOK, answer.ResBody(answer.EcodeOK, "", payload))
 	}
 }
+
+// 👇 1. 定义你要求返回的 JSON 结构体（完全匹配你给的样例）
+type BillDetailResp struct {
+	Cid     int64           `json:"cid"`      // 对应 CategoryId
+	OccTime string          `json:"occ_time"` // 时间字符串原样返回
+	Amount  decimal.Decimal `json:"amount"`   // 主账单金额
+	Remark  string          `json:"remark"`   // 备注
+	Detail  []DetailItem    `json:"detail"`   // 明细数组
+}
+
+// DetailItem 账单明细项
+type DetailItem struct {
+	Name     string          `json:"name"`     // 物品名称
+	Quantity decimal.Decimal `json:"quantity"` // 数目
+	Price    decimal.Decimal `json:"price"`    // 单价
+	Total    decimal.Decimal `json:"total"`    // 总价 = 数量 × 单价
+	Unit     string          `json:"unit"`     // 单位
+}
+
+// BillDetails 账单详情（完整实现）
+func BillDetails() func(ctx context.Context, c *app.RequestContext) {
+	return func(ctx context.Context, c *app.RequestContext) {
+		klog := slog.FromContext(c)
+		klog.Debug("BillDetails")
+
+		// 1. 获取用户实例ID
+		userId := c.GetString("userId")
+		instanceId, err := instance.GetInstanceId(userId)
+		if err != nil {
+			klog.Errorf("get instance id failed: %v", err)
+			c.JSON(http.StatusBadRequest,
+				answer.ResBody(answer.EcodeInvalidRequestError,
+					"Failed to get your account info. Try again later.", nil))
+			return
+		}
+
+		// 2. 绑定路径参数 billId
+		type Query struct {
+			BillId int64 `path:"id"` // 统一大写，避免绑定失败
+		}
+		var q Query
+		if err := c.BindPath(&q); err != nil {
+			klog.Errorf("bind path failed: %v", err)
+			c.JSON(http.StatusBadRequest,
+				answer.ResBody(answer.EcodeInvalidRequestError,
+					"invalid query parameter", nil))
+			return
+		}
+
+		// 3. 查询主账单
+		billList, err := models.GetBillById(instanceId, q.BillId)
+		if err != nil {
+			klog.Errorf("get bill failed: %v", err)
+			c.JSON(http.StatusInternalServerError,
+				answer.ResBody(answer.EcodeError,
+					"get bill info error", nil))
+			return
+		}
+		if len(billList) == 0 {
+			c.JSON(http.StatusOK,
+				answer.ResBody(answer.EcodeOK, "bill not found", nil))
+			return
+		}
+		bill := billList[0] // 单条账单
+
+		// 4. 查询账单明细
+		detailList, err := models.GetDetail(q.BillId)
+		if err != nil {
+			klog.Errorf("get bill detail failed: %v", err)
+			c.JSON(http.StatusInternalServerError,
+				answer.ResBody(answer.EcodeError,
+					"get bill detail error", nil))
+			return
+		}
+
+		// 5. 组装明细结构
+		detailItems := make([]DetailItem, 0, len(detailList))
+		for _, d := range detailList {
+			detailItems = append(detailItems, DetailItem{
+				Name:     d.Name,
+				Quantity: d.Quantity,
+				Price:    d.Price,
+				Total:    d.Total,
+				Unit:     d.Unit,
+			})
+		}
+
+		// 6. 组装最终返回体（完全匹配你要求的JSON）
+		respData := BillDetailResp{
+			Cid:     bill.CategoryId,
+			OccTime: bill.OccTime,
+			Amount:  bill.Amount,
+			Remark:  bill.Remark,
+			Detail:  detailItems,
+		}
+
+		// 7. 返回成功响应
+		c.JSON(http.StatusOK, answer.ResBody(answer.EcodeOK, "", respData))
+	}
+}
