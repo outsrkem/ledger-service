@@ -23,3 +23,7 @@ export const DelTransactions = (id) => ajax(`/api/ledger/v1/transactions/${id}`,
 export const Getcategory = (params) => ajax("/api/ledger/v1/category", "GET", params, null);
 export const GetStatistic = (params) => ajax("/api/ledger/v1/bill/statistic", "GET", params, null);
 export const GetBillDetails = (id) => ajax(`/api/ledger/v1/bill/${id}`, "GET", null, null);
+
+// 数据总览
+export const GetCycleSummary = (params) => ajax(`/api/ledger/v1/stat/cycle-summary`, "GET", params, null);
+export const GetChartDay = (params) => ajax(`/api/ledger/v1/stat/chart/day`, "GET", params, null);

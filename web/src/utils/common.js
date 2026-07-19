@@ -41,7 +41,7 @@ export function convertToLimitOffset(page, pageSize) {
 // (whether successful or failed) is delayed by at least the specified waitTime
 // If the request completes before waitTime, it will wait for the remaining time
 // If the request takes longer than waitTime, it will resolve/reject immediately upon completion
-export function withDelay(requestFn, waitTime = 320) {
+export function withDelay(requestFn, waitTime = 380) {
     // Record the start time of the request
     const startTime = Date.now();
 
