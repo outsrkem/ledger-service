@@ -3,18 +3,14 @@
         <el-card>
             <template #header>
                 <div class="my_refresh">
-                    <el-row>
-                        <span>记账管理</span>
-                        <span style="padding-left: 5px; padding-right: 5px"></span>
-                    </el-row>
-                    <el-row>
-                        <el-button type="primary" @click="onAddTransactions" style="margin-left: 10px">记一笔</el-button>
-                        <el-button type="primary" :icon="Refresh" @click="onRefresh" :loading="loading" style="margin-left: 10px">刷新</el-button>
-                    </el-row>
+                    <span>记账管理</span>
+                    <el-space>
+                        <el-button type="success" @click="onAddBill">记一笔</el-button>
+                        <el-button type="primary" :icon="Refresh" @click="onRefresh" :loading="loading">刷新</el-button>
+                    </el-space>
                 </div>
             </template>
 
-            <!-- 只替换这里：原生el-table → MyTable，其余完全不变 -->
             <MyTable :data="transactions" :columns="columns" v-loading="loading">
                 <!-- 交易时间插槽 -->
                 <template #occ_time="{ row }">
@@ -29,8 +25,7 @@
                     <span
                         :style="{
                             color: row.amount > 0 ? 'red' : row.amount < 0 ? 'green' : 'black',
-                        }"
-                    >
+                        }">
                         {{ row.amount }}
                     </span>
                 </template>
@@ -52,7 +47,7 @@
             </MyTable>
 
             <div class="pagination">
-                <pagination :pageTotal="pageTotal" :pageSize="pageSize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange" />
+                <pagination :pageTotal="pageTotal" :pageSize="pageSize" @syncsize="onSyncsize" @CurrentChange="onCurrentChange" @SizeChange="onSizeChange" />
             </div>
         </el-card>
         <add-transactions ref="AddTransactions" />
@@ -83,9 +78,8 @@ export default {
             pageTotal: 0,
             pageSize: 10,
             page: 1,
-            transactions: [{}, {}, {}],
+            transactions: Array.from({ length: 5 }, () => ({})),
             category: [],
-            // 新增列配置，对应MyTable
             columns: [
                 { label: "交易时间", slot: "occ_time" },
                 { label: "类别", slot: "category_title" },
@@ -99,16 +93,21 @@ export default {
         formatDate(time) {
             return formatTime(time);
         },
+        onSyncsize(s, p) {
+            this.pageSize = s;
+            this.page = p;
+            this.onRefresh();
+        },
         onCurrentChange(p) {
             this.page = p;
-            this.loadGetPerson(this.pageSize, p);
+            this.loadGetBill(this.pageSize, p);
         },
         onSizeChange(s) {
             this.pageSize = s;
             this.page = 1;
-            this.loadGetPerson(s, 1);
+            this.loadGetBill(s, 1);
         },
-        loadGetPerson: async function (pageSize, page) {
+        loadGetBill: async function (pageSize, page) {
             this.loading = true;
             const params = convertToLimitOffset(page, pageSize);
             withDelay(() => GetTransactions(params))
@@ -131,9 +130,9 @@ export default {
         onRefresh() {
             this.loading = true;
             this.loadGetCategory();
-            this.loadGetPerson(this.pageSize, this.page);
+            this.loadGetBill(this.pageSize, this.page);
         },
-        onAddTransactions() {
+        onAddBill() {
             this.$refs.AddTransactions.onOpenDialog();
         },
         // 查看详情
@@ -157,12 +156,9 @@ export default {
     },
     created() {
         this.$globalBus.emit("updateActivePath", "/transactions");
-        this.onRefresh();
         this.$globalBus.on("onRefresh", () => {
             this.onRefresh();
         });
     },
 };
 </script>
-
-<style scoped lang="less"></style>
