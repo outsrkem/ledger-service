@@ -42,22 +42,19 @@
 </template>
 
 <script>
-import { msgcon } from "../../utils/message.js";
 import { GetTransactions, Getcategory, DelTransactions } from "../../api/basic.js";
 import { withDelay, convertToLimitOffset } from "../../utils/common.js";
 import { getCategoryPath } from "../../utils/category.js";
-import { formatTime } from "../../utils/date.js";
 
-import { List as VanList, Cell as VanCell, CellGroup as VanCellGroup, Dialog as VanDialog } from "vant";
+import { List as VanList, Dialog as VanDialog, BackTop as VanBackTop } from "vant";
 import { showSuccessToast } from "vant";
 
 export default {
     name: "AccountListMob",
     components: {
         VanList,
-        VanCell,
-        VanCellGroup,
         VanDialog,
+        VanBackTop,
     },
     data() {
         return {
@@ -120,11 +117,19 @@ export default {
             return dateStr;
         },
 
-        // 按日期分组
+        // 按日期分组 - 修复日期分组key生成方式
         groupTransactionsByDate(list) {
             const groups = {};
-            list.forEach((item) => {
-                const key = new Date(item.occ_time).toDateString();
+            const safeList = Array.isArray(list) ? list : [];
+
+            safeList.forEach((item) => {
+                // 使用更可靠的日期分组方式，避免时区和格式问题
+                const date = new Date(item.occ_time);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, "0");
+                const day = String(date.getDate()).padStart(2, "0");
+                const key = `${year}-${month}-${day}`;
+
                 if (!groups[key]) {
                     groups[key] = {
                         dateText: this.formatSmartDate(item.occ_time),
@@ -133,6 +138,7 @@ export default {
                 }
                 groups[key].items.push(item);
             });
+
             return Object.values(groups).sort((a, b) => {
                 return new Date(b.items[0].occ_time) - new Date(a.items[0].occ_time);
             });
@@ -141,7 +147,7 @@ export default {
         async onLoad() {
             try {
                 await this.loadData();
-            } catch (err) {
+            } catch {
                 this.loading = false;
             }
         },
@@ -152,23 +158,28 @@ export default {
                 const res = await withDelay(() => GetTransactions(params));
                 const resp = res.payload?.items || [];
 
-                let categoryList = [];
-                try {
-                    categoryList = JSON.parse(localStorage.getItem("category"));
-                } catch (e) {}
+                // localStorage为空时兜底空数组，不再是null
+                const cacheStr = localStorage.getItem("category");
+                let categoryList = cacheStr ? JSON.parse(cacheStr) : [];
 
                 resp.forEach((item) => {
                     item.category_title = getCategoryPath(categoryList, item.category_id) || "未知分类";
                 });
 
+                // 使用 Set 去重，基于 id，避免重复数据
+                const existingIds = new Set(this.transactions.map((t) => t.id));
+                const newItems = resp.filter((item) => !existingIds.has(item.id));
+
                 if (this.page === 1) {
-                    this.transactions = resp;
+                    this.transactions = newItems;
                 } else {
-                    this.transactions = [...this.transactions, ...resp];
+                    this.transactions = [...this.transactions, ...newItems];
                 }
 
+                // 重新分组
                 this.groupedTransactions = this.groupTransactionsByDate(this.transactions);
 
+                // 判断是否还有更多数据
                 if (resp.length < this.pageSize) {
                     this.finished = true;
                 } else {
@@ -192,18 +203,16 @@ export default {
             try {
                 await this.loadAllCategory();
                 await this.loadData();
-            } catch (err) {
+            } catch {
                 this.refreshing = false;
                 this.loading = false;
             }
         },
 
         async loadAllCategory() {
-            try {
-                const [res1, res2] = await Promise.all([Getcategory({ direction: 2 }), Getcategory({ direction: 1 })]);
-                const all = [...(res1.payload.items || []), ...(res2.payload.items || [])];
-                localStorage.setItem("category", JSON.stringify(all));
-            } catch (e) {}
+            const [res1, res2] = await Promise.all([Getcategory({ direction: 2 }), Getcategory({ direction: 1 })]);
+            const all = [...(res1.payload?.items || []), ...(res2.payload?.items || [])];
+            localStorage.setItem("category", JSON.stringify(all));
         },
 
         onAddTransactions() {
@@ -214,26 +223,39 @@ export default {
             this.currentDeleteItem = val;
             this.showDeleteDialog = true;
         },
+
         onDeleteTransactions() {
             if (!this.currentDeleteItem) return;
             DelTransactions(this.currentDeleteItem.id)
                 .then(() => {
                     showSuccessToast("删除成功");
+                    // 删除后重置并刷新列表
                     this.page = 1;
+                    this.finished = false;
+                    this.transactions = [];
+                    this.groupedTransactions = [];
                     this.onLoad();
                 })
                 .catch((err) => {
                     console.log(err);
                 })
                 .finally(() => {
+                    this.showDeleteDialog = false;
                     this.currentDeleteItem = null;
                 });
         },
     },
-    created() {
+    async created() {
         this.$globalBus.on("onRefresh", () => {
             this.onRefresh();
         });
+
+        // 页面初始化判断分类缓存，无缓存先加载分类
+        const cache = localStorage.getItem("category");
+        if (!cache) {
+            await this.loadAllCategory();
+        }
+        await this.onLoad();
     },
 };
 </script>
@@ -274,10 +296,10 @@ export default {
     position: absolute;
     box-sizing: border-box;
     top: 0;
-    left: 0; /* 左边距 */
-    right: 0; /* 右边距 */
+    left: 0;
+    right: 0;
     height: 1px;
-    background: #ebedf0; /* 中间分隔线颜色 */
+    background: #ebedf0;
     transform: scaleY(0.5);
     pointer-events: none;
 }

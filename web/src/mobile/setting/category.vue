@@ -15,8 +15,7 @@
                         backgroundColor: activeParentId === item.id ? '#1989fa' : '#f2f3f5',
                         color: activeParentId === item.id ? '#fff' : '#333',
                     }"
-                    @click="selectParent(item)"
-                >
+                    @click="selectParent(item)">
                     {{ item.name }}
                 </div>
             </div>
@@ -31,8 +30,7 @@
                         backgroundColor: activeSubId === sub.id ? '#1989fa' : '#e8f4ff',
                         color: activeSubId === sub.id ? '#fff' : '#1989fa',
                     }"
-                    @click="selectSub(sub)"
-                >
+                    @click="selectSub(sub)">
                     {{ sub.name }}
                 </div>
             </div>
@@ -44,13 +42,12 @@
 import { Getcategory } from "../../api/basic.js";
 import { withDelay } from "../../utils/common.js";
 
-import { NavBar as VanNavBar, Loading as VanLoading } from "vant";
+import { NavBar as VanNavBar } from "vant";
 
 export default {
     name: "CategoryMob",
     components: {
         VanNavBar,
-        VanLoading,
     },
     data() {
         return {
