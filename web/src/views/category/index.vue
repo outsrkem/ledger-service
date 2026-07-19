@@ -52,7 +52,7 @@ export default {
             this.page = 1;
             this.loadGetCategory(s, 1);
         },
-        loadGetCategory: async function (pageSize, page) {
+        loadGetCategory: async function () {
             this.loading = true;
             const params = { direction: 2 };
             withDelay(() => Getcategory(params))

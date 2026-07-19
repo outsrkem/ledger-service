@@ -72,7 +72,9 @@ export default {
             let categoryList = [];
             try {
                 categoryList = JSON.parse(localStorage.getItem("category")) || [];
-            } catch (e) {}
+            } catch (e) {
+                console.log(e);
+            }
 
             if (categoryList && categoryList.length > 0) {
                 return categoryList;
@@ -107,7 +109,7 @@ export default {
                 showToast("刷新中...");
                 await this.getBillDetail();
                 showToast("刷新成功");
-            } catch (err) {
+            } catch {
                 showToast("刷新失败");
             }
         },
@@ -123,7 +125,9 @@ export default {
                 });
                 await DelTransactions(this.billId);
                 this.$router.back();
-            } catch (error) {}
+            } catch {
+                showToast("刷新失败");
+            }
         },
     },
 };

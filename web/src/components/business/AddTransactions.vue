@@ -11,8 +11,7 @@
                                     { value: 2, label: '支出' },
                                     { value: 1, label: '收入' },
                                 ]"
-                                @change="onSwitchCategory"
-                            />
+                                @change="onSwitchCategory" />
                         </el-form-item>
                     </el-col>
                     <el-col :span="16">
@@ -34,8 +33,7 @@
                                     v-model="formdata.category"
                                     :options="row"
                                     @change="(val) => onChangeCategory(val, rowIndex)"
-                                    class="category-segment"
-                                >
+                                    class="category-segment">
                                     <template #default="scope">
                                         <div class="segment-item">
                                             {{ scope.item.name }}
@@ -47,8 +45,7 @@
                                     v-if="formdata.category && activeRowIndex === rowIndex"
                                     v-model="formdata.subcategory"
                                     :options="subcategory"
-                                    class="subcategory-segment"
-                                >
+                                    class="subcategory-segment">
                                     <template #default="scope">
                                         <div class="segment-item">
                                             {{ scope.item.name }}
@@ -69,31 +66,16 @@
 
                     <!-- 明细行 -->
                     <div v-for="(row, index) in detailRows" :key="row.id" class="detail-row">
-                        <el-input
-                            v-model="row.name"
-                            placeholder="物品名称"
-                            style="width: 20%; margin-right: 1%"
-                            @input="calculateTotal(index)"
-                        ></el-input>
+                        <el-input v-model="row.name" placeholder="物品名称" style="width: 20%; margin-right: 1%" @input="calculateTotal(index)"></el-input>
 
-                        <el-input
-                            v-model="row.quantity"
-                            placeholder="数量"
-                            style="width: 15%; margin-right: 1%"
-                            @input="calculateTotal(index)"
-                        ></el-input>
+                        <el-input v-model="row.quantity" placeholder="数量" style="width: 15%; margin-right: 1%" @input="calculateTotal(index)"></el-input>
                         <el-select v-model="row.unit" placeholder="单位" filterable allow-create style="width: 10%; margin-right: 1%">
                             <el-option label="斤" value="斤" />
                             <el-option label="克" value="克" />
                             <el-option label="个" value="个" />
                             <el-option label="份" value="份" />
                         </el-select>
-                        <el-input
-                            v-model="row.price"
-                            placeholder="单价"
-                            style="width: 15%; margin-right: 1%"
-                            @input="calculateTotal(index)"
-                        ></el-input>
+                        <el-input v-model="row.price" placeholder="单价" style="width: 15%; margin-right: 1%" @input="calculateTotal(index)"></el-input>
 
                         <el-input v-model="row.total" placeholder="总额" style="width: 20%; margin-right: 1%"></el-input>
                         <el-button type="text" :icon="Remove" @click="removeDetailRow(index)"></el-button>
@@ -235,12 +217,7 @@ export default {
             const valid = await this.validateForm();
             if (!valid) return;
 
-            let cid = 0;
-            if (this.formdata.subcategory === "") {
-                cid = this.formdata.category;
-            } else {
-                cid = this.formdata.subcategory;
-            }
+            const cid = this.formdata.subcategory ? this.formdata.subcategory : this.formdata.category;
 
             // 将总金额转换为数字
             let amount = Number(this.formdata.amount);

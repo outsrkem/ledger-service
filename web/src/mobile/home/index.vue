@@ -4,7 +4,7 @@
 
         <van-tabbar route v-model="active">
             <!-- 账单：添加双击刷新 -->
-            <van-tabbar-item to="/bill" icon="balance-list" @dblclick.native="onBillDoubleClick"> 账单 </van-tabbar-item>
+            <van-tabbar-item to="/bill" icon="balance-list" @dblclick="onBillDoubleClick"> 账单 </van-tabbar-item>
 
             <van-tabbar-item to="/report" icon="info">报表</van-tabbar-item>
             <van-tabbar-item icon="records" @click.prevent="onAddTransactions">添加</van-tabbar-item>
