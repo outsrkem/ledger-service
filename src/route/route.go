@@ -44,4 +44,18 @@ func AppRoute(h *server.Hertz) {
 	h.POST("/v1/tag", apc("ledger:tag:create"), tag.CreateTag()) // 创建标签 √
 
 	h.GET("/v1/bill/statistic", apc("ledger:transaction:list"), statistic.StatOve()) // 统计收支,年，月，自定义
+
+	//	/v1/stat/cycle-summary?cycleType=month&targetDate=2026-07 月度汇总 ct=month&td=2026-07
+	//	/v1/stat/chart/day?startDate=2026-07-01&endDate=2026-07-31 当月每日趋势 from=2026-07-01&to=2026-07-31
+	//	/v1/stat/category?cycleType=month&targetDate=2026-07 分类饼图 ct=month&td=2026-07
+	//	/v1/stat/chart/month?limit=6 近6月对比柱状
+	//	/v1/stat/expense-rank?cycleType=month&targetDate=2026-07&topNum=10 支出分类排行 ct=month&td=2026-07&tn=10
+
+	h.GET("/v1/stat/cycle-summary", apc("ledger:transaction:list"), statistic.CycleSummary()) // √ 月度汇总
+	h.GET("/v1/stat/chart/day", apc("ledger:transaction:list"), statistic.DayTrend())         // √ 日收支趋势
+	h.GET("/v1/stat/chart/month", apc("ledger:transaction:list"), statistic.MonthTrend())     // √ 月收支趋势
+	h.GET("/v1/stat/chart/year", apc("ledger:transaction:list"), statistic.YearTrend())       // √ 年收支趋势
+	//h.GET("/v1/stat/category", apc("ledger:transaction:list")) // 收支分类构成
+	//h.GET("/v1/stat/chart/month", apc("ledger:transaction:list")) // 近 6 个月收支
+	//h.GET("/v1/stat/expense-rank", apc("ledger:transaction:list")) // 本月支出分类 TOP 排行
 }
