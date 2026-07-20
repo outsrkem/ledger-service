@@ -36,18 +36,14 @@ type ReqTransaction struct {
 
 // 转换时间字符串为毫秒时间戳
 func timeToMillisecond(timeStr string) int64 {
-	// 参考：https://pkg.go.dev/time#pkg-constants
+	// https://pkg.go.dev/time#pkg-constants
 	layout := "2006-01-02T15:04:05-0700"
-
-	// 解析时间字符串
 	t, err := time.Parse(layout, timeStr)
 	if err != nil {
 		return 0
 	}
 
-	// 返回毫秒级时间戳（Unix时间戳是秒，乘以1000得到毫秒）
-	// 也可以直接使用 t.UnixMilli()（Go 1.17+支持）
-	return t.Unix() * 1000
+	return t.UnixMilli()
 }
 
 func CreateTransaction() func(ctx context.Context, c *app.RequestContext) {
@@ -79,6 +75,7 @@ func CreateTransaction() func(ctx context.Context, c *app.RequestContext) {
 			CategoryId: ReqData.Cid,
 			Amount:     ReqData.Amount,
 			OccTime:    ReqData.OccTime,
+			OccAt:      timeToMillisecond(ReqData.OccTime),
 			Remark:     ReqData.Remark,
 			UpdateTime: now,
 			CreateTime: now,

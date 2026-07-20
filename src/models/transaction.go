@@ -12,6 +12,7 @@ type OrmTransaction struct {
 	CategoryId int64           `gorm:"column:category_id"`    // 分类ID
 	Amount     decimal.Decimal `gorm:"column:amount"`         // 金额,0.0000
 	OccTime    string          `gorm:"column:occ_time"`       // 账目发生时间(occurrence)
+	OccAt      int64           `gorm:"column:occ_at"`         // 账目发生时间戳(occurrence)
 	Remark     string          `gorm:"column:remark"`         // 详细备注
 	UpdateTime int64           `gorm:"column:update_time"`    // 记录时间
 	CreateTime int64           `gorm:"column:create_time"`    // 更新时间
