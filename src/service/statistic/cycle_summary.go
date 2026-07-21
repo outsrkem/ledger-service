@@ -22,6 +22,8 @@ type QueryArgs struct {
 	From  string `query:"from"`  // 自定义起点 YYYY-MM-DD
 	To    string `query:"to"`    // 自定义结束 YYYY-MM-DD
 	Limit string `query:"limit"` // 近N个周期值
+	Lg    int    `query:"lg"`    // LayerGroup 分类汇总，1为大类，2为小类
+	Dt    int    `query:"dt"`    // direction topN ，1收入，2支出
 }
 
 // ResolveCycleRange 解析周期时间范围,优先 from/to，没有则根据 ct+td 自动生成

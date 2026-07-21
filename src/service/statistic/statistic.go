@@ -124,3 +124,81 @@ func S01(c *app.RequestContext, pt, from, to string) {
 	// 返回成功响应
 	c.JSON(http.StatusOK, answer.ResBody(answer.EcodeOK, nil, payload))
 }
+
+// CategoryPie 收支分类饼图
+func CategoryPie() func(ctx context.Context, c *app.RequestContext) {
+	return func(ctx context.Context, c *app.RequestContext) {
+		klog := slog.FromContext(c)
+		var req QueryArgs
+		if err := c.BindAndValidate(&req); err != nil {
+			klog.Error("BindAndValidate ", err)
+			c.JSON(http.StatusBadRequest, answer.ResBody(answer.EcodeInvalidRequestError, err.Error(), nil))
+			return
+		}
+		//1. 解析时间区间（优先自定义from/to，否则根据 ct+td 自动计算）
+		from, to, name, dayCnt, err := ResolveCycleRange(req.Ct, req.Td, req.From, req.To)
+		if err != nil {
+			klog.Error("ResolveCycleRange err", err)
+			c.JSON(http.StatusBadRequest, answer.ResBody(answer.EcodeInvalidRequestError, "时间参数错误", nil))
+			return
+		}
+		fmt.Println(from)
+		fmt.Println(to)
+		fmt.Println(name)
+		fmt.Println(dayCnt)
+		//2. 获取DB实例
+
+		dao, err := models.NewDBModel(c.GetString(constants.InstanceIdKey))
+		if err != nil {
+			klog.Errorf("NewDBModel error %s", err)
+			c.JSON(http.StatusInternalServerError, answer.ResBody(answer.EcodeError, err.Error(), nil))
+			return
+		}
+		result, err := dao.QueryCategoryStat(from, to, req.Lg)
+		if err != nil {
+			klog.Errorf("统计收支失败: %v", err)
+			c.JSON(http.StatusInternalServerError, answer.ResBody(answer.EcodeError, "统计失败", nil))
+			return
+		}
+		c.JSON(http.StatusOK, answer.ResBody(answer.EcodeOK, nil, result))
+	}
+}
+
+// ExpenseRank 支出分类 TOP 排行
+func ExpenseRank() func(ctx context.Context, c *app.RequestContext) {
+	return func(ctx context.Context, c *app.RequestContext) {
+		klog := slog.FromContext(c)
+		var req QueryArgs
+		if err := c.BindAndValidate(&req); err != nil {
+			klog.Error("BindAndValidate ", err)
+			c.JSON(http.StatusBadRequest, answer.ResBody(answer.EcodeInvalidRequestError, err.Error(), nil))
+			return
+		}
+		//1. 解析时间区间（优先自定义from/to，否则根据 ct+td 自动计算）
+		from, to, name, dayCnt, err := ResolveCycleRange(req.Ct, req.Td, req.From, req.To)
+		if err != nil {
+			klog.Error("ResolveCycleRange err", err)
+			c.JSON(http.StatusBadRequest, answer.ResBody(answer.EcodeInvalidRequestError, "时间参数错误", nil))
+			return
+		}
+		fmt.Println(from)
+		fmt.Println(to)
+		fmt.Println(name)
+		fmt.Println(dayCnt)
+		//2. 获取DB实例
+
+		dao, err := models.NewDBModel(c.GetString(constants.InstanceIdKey))
+		if err != nil {
+			klog.Errorf("NewDBModel error %s", err)
+			c.JSON(http.StatusInternalServerError, answer.ResBody(answer.EcodeError, err.Error(), nil))
+			return
+		}
+		result, err := dao.QueryExpenseRank(from, to, 10, req.Dt)
+		if err != nil {
+			klog.Errorf("统计收支失败: %v", err)
+			c.JSON(http.StatusInternalServerError, answer.ResBody(answer.EcodeError, "统计失败", nil))
+			return
+		}
+		c.JSON(http.StatusOK, answer.ResBody(answer.EcodeOK, nil, result))
+	}
+}
