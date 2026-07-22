@@ -51,6 +51,8 @@
             </div>
         </el-card>
         <add-transactions ref="AddTransactions" />
+        <UpdateTransactions ref="UpdateTransactions" />
+        <TranDetail ref="TranDetail" />
     </div>
 </template>
 
@@ -62,10 +64,14 @@ import { withDelay, convertToLimitOffset } from "../../utils/common.js";
 import { getCategoryPath } from "../../utils/category.js";
 import { Refresh } from "@element-plus/icons-vue";
 import { formatTime } from "../../utils/date.js";
+import UpdateTransactions from "./update.vue";
+import TranDetail from "./detail.vue";
 export default {
     name: "TransactionsIndex",
     components: {
         MyTable,
+        UpdateTransactions,
+        TranDetail,
     },
     setup() {
         return {
@@ -138,9 +144,11 @@ export default {
         // 查看详情
         onDetail(val) {
             console.log(val);
+            this.$refs.TranDetail.onOpenDialog(val);
         },
         onUpdate(val) {
             console.log(val);
+            this.$refs.UpdateTransactions.onOpenDialog(val);
         },
         onDeleteTransactions(val) {
             DelTransactions(val.id)
