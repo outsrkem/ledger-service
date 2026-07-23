@@ -61,20 +61,44 @@ func FindTransactionForUser(instanceId string, transactionId int64) ([]*OrmTrans
 	return detail, r.Error
 }
 
+// DeleteTransaction 删除记账单
 func DeleteTransaction(instanceId string, transactionId int64) error {
 	r := db.Model(&OrmTransaction{}).
 		Where("instance_id = ? AND kid = ?", instanceId, transactionId).Delete(&OrmTransaction{})
 	return r.Error
 }
 
-func UpdateTransaction(detail OrmTransaction) error {
-	return db.Model(&OrmTransaction{}).Updates(map[string]interface{}{
-		"category_id": detail.CategoryId,
-		"occ_time":    detail.OccTime,
-		"amount":      detail.Amount,
-		"remark":      detail.Remark,
-		"update_time": detail.UpdateTime,
-	}).Error
+// UpdateTransaction
+// transaction: 主表待更新字段map
+// detailList == nil ：不操作明细表，保留原有明细
+// detailList != nil：先删除当前交易所有明细；len=0清空明细，len>0替换明细
+func (d DB) UpdateTransaction(tid int64, transaction map[string]any, detailList []*OrmDetail) error {
+	err := d.db.Transaction(func(tx *gorm.DB) error {
+		// 1. 更新主交易记录（有字段才更新）
+		if len(transaction) > 0 {
+			if err := tx.Model(&OrmTransaction{}).
+				Where("instance_id = ? AND kid = ?", d.instanceId, tid).
+				Updates(transaction).Error; err != nil {
+				return err
+			}
+		}
+
+		// 2. 如果传入明细数组：先删旧，再批量插入新明细
+		if detailList != nil {
+			if err := tx.Where("transaction_id = ?", tid).
+				Delete(&OrmDetail{}).Error; err != nil {
+				return err
+			}
+
+			if len(detailList) > 0 {
+				if err := tx.Create(detailList).Error; err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
+	return err
 }
 
 func FindTransactionAll(instanceId string, limit, offset int, count *int64) ([]*OrmTransaction, error) {
@@ -97,36 +121,4 @@ func GetBillById(instanceId string, billId int64) ([]*OrmTransaction, error) {
 		Find(&detail).Error
 
 	return detail, err
-}
-
-type SouZhiResult struct {
-	Income  decimal.Decimal `gorm:"column:income" json:"income"`   // 总收入
-	Expense decimal.Decimal `gorm:"column:expense" json:"expense"` // 总支出（正数）
-}
-
-// CountSouZhi 一个函数实现 按年/按月/自定义日期 统计收支
-func (d *DB) CountSouZhi(timeType string, from, to string) (*SouZhiResult, error) {
-	var res SouZhiResult
-
-	// 基础DB
-	db := d.WithInstance().Table("ledger_transaction")
-
-	// ====================================================
-	// 把结束日期 +1 天，并用 < 代替 <=，实现日期闭区间全覆盖
-	// 例如：2026-03-31 → 变成 2026-04-01 00:00:00
-	// 这样能查到 2026-03-31 全天所有数据
-	// ====================================================
-	db = db.Where(`
-		STR_TO_DATE(occ_time, '%Y-%m-%dT%H:%i:%s+0800') >= ? 
-		AND 
-		STR_TO_DATE(occ_time, '%Y-%m-%dT%H:%i:%s+0800') < ? + INTERVAL 1 DAY
-	`, from, to)
-
-	// 统计收入、支出
-	err := db.Select(`
-		IFNULL(SUM(CASE WHEN amount > 0 THEN amount ELSE 0 END), 0) AS income,
-		IFNULL(ABS(SUM(CASE WHEN amount < 0 THEN amount ELSE 0 END)), 0) AS expense
-	`).Scan(&res).Error
-
-	return &res, err
 }
