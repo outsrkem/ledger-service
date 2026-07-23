@@ -36,7 +36,7 @@
                 </template>
                 <!-- 操作插槽 -->
                 <template #action="{ row }">
-                    <el-button link type="primary" @click="onDetail(row)">查看详情</el-button>
+                    <el-button link type="primary" @click="onDetail(row)">详情</el-button>
                     <el-button link type="primary" @click="onUpdate(row)">修改</el-button>
                     <el-popconfirm class="box-item" :title="`删除：${row.amount}`" placement="left-end" @confirm="onDeleteTransactions(row)">
                         <template #reference>
@@ -143,11 +143,9 @@ export default {
         },
         // 查看详情
         onDetail(val) {
-            console.log(val);
             this.$refs.TranDetail.onOpenDialog(val);
         },
         onUpdate(val) {
-            console.log(val);
             this.$refs.UpdateTransactions.onOpenDialog(val);
         },
         onDeleteTransactions(val) {
