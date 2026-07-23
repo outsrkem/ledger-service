@@ -1,5 +1,5 @@
 <template>
-    <el-drawer v-model="drawer" direction="ltr" title="账单详情" width="920px" @close="handleClose">
+    <el-drawer v-model="drawer" direction="rtl" title="账单详情" :size="'35%'" @close="handleClose">
         <div v-loading="loading" class="detail-wrap">
             <!-- 主金额区块 -->
             <div class="amount-card">
@@ -34,7 +34,7 @@
                     </div>
                 </div>
             </div>
-            <div class="empty-tip" v-else>暂无物品明细</div>
+            <div class="empty-tip" v-else>暂无明细</div>
         </div>
     </el-drawer>
 </template>
@@ -47,9 +47,17 @@ const DEFAULT_TRAN_FORM = {
     occ_time: "",
     amount: "",
     category: "",
-    categoryName: "", // 分类名称（后端payload需要返回，如果你接口没有我后面说明兼容方案）
+    categoryName: "",
     remark: "",
-    detail: [],
+    detail: [
+        {
+            name: "",
+            quantity: null,
+            price: null,
+            unit: "",
+            total: null,
+        },
+    ],
 };
 
 export default {
@@ -73,6 +81,7 @@ export default {
     },
     methods: {
         async onOpenDialog(val) {
+            this.tranRawAmount = 0;
             this.loading = true;
             this.drawer = true;
             this.tranId = val.id;
@@ -100,7 +109,7 @@ export default {
         // 关闭抽屉重置数据，防止缓存旧数据
         handleClose() {
             this.tranId = "";
-            this.tranRawAmount = 0;
+            // this.tranRawAmount = 0;
         },
     },
 };
