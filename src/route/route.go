@@ -36,8 +36,9 @@ func AppRoute(h *server.Hertz) {
 
 	h.POST("/v1/transactions", apc("ledger:transaction:create"), transaction.CreateTransaction())       // 添加记账流水 √
 	h.GET("/v1/transactions", apc("ledger:transaction:list"), transaction.SelectTransaction())          // 查询记账流水 √
-	h.PATCH("/v1/transactions/:id", apc("ledger:transaction:update"), helloWorld())                     // 修改
+	h.PATCH("/v1/transactions/:id", apc("ledger:transaction:update"), transaction.UpdateTransaction())  // 修改
 	h.DELETE("/v1/transactions/:id", apc("ledger:transaction:delete"), transaction.DeleteTransaction()) // 删除 √
+	h.GET("/v1/transactions/:id", apc("ledger:transaction:list"), transaction.BillDetails())            // 账单详情ledger:bill:get
 
 	h.GET("/v1/bill/:id", apc("ledger:transaction:list"), transaction.BillDetails()) // 账单详情ledger:bill:get
 

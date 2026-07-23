@@ -17,11 +17,10 @@ import (
 // Detail 账目明细
 type Detail struct {
 	Name     string          `json:"name"`     // 物品名称（如“牛奶”）
-	Quantity decimal.Decimal `json:"quantity"` // 数目（如：2件商品、2次服务）
-	Price    decimal.Decimal `json:"price"`    // 单价
+	Quantity decimal.Decimal `json:"quantity"` // 数量（如：2件商品、2次服务）
 	Unit     string          `json:"unit"`     // 单位
+	Price    decimal.Decimal `json:"price"`    // 单价
 	Total    decimal.Decimal `json:"total"`    // 总价（数目 × 单价，与原 amount 绝对值匹配）
-	Remark   string          `json:"cremark"`  // 详细备注
 }
 
 // ReqTransaction 请求数据
@@ -142,26 +141,35 @@ func SelectTransaction() func(ctx context.Context, c *app.RequestContext) {
 			c.JSON(http.StatusInternalServerError, answer.ResBody(answer.EcodeError, "Internal server error.", ""))
 			return
 		}
+		type Category struct {
+			Name string `json:"name,omitempty"`
+			Id   int64  `json:"id,omitempty"`
+		}
 		type resp struct {
 			Kid        int64           `json:"id"`
 			CategoryId int64           `json:"category_id"`
+			Category   Category        `json:"category"`
 			Amount     decimal.Decimal `json:"amount"`
 			OccTime    int64           `json:"occ_time"`
 			Remark     string          `json:"remark"`
 			UpdateTime int64           `json:"update_time"`
 			CreateTime int64           `json:"create_time"`
 		}
-		data := make([]*resp, 0)
-		for _, v := range result {
-			data = append(data, &resp{
+		data := make([]*resp, len(result))
+		for k, v := range result {
+			item := &resp{
 				Kid:        v.Kid,
 				CategoryId: v.CategoryId,
+				Category: Category{
+					Id: v.CategoryId,
+				},
 				Amount:     v.Amount,
 				OccTime:    timeToMillisecond(v.OccTime),
 				Remark:     v.Remark,
 				UpdateTime: v.UpdateTime,
 				CreateTime: v.CreateTime,
-			})
+			}
+			data[k] = item
 		}
 		pageInfo := answer.SetPageInfo(limit, offset, count)
 		payload := map[string]interface{}{
@@ -174,7 +182,6 @@ func SelectTransaction() func(ctx context.Context, c *app.RequestContext) {
 	}
 }
 
-// 👇 1. 定义你要求返回的 JSON 结构体（完全匹配你给的样例）
 type BillDetailResp struct {
 	Cid     int64           `json:"cid"`      // 对应 CategoryId
 	OccTime string          `json:"occ_time"` // 时间字符串原样返回
@@ -192,7 +199,7 @@ type DetailItem struct {
 	Unit     string          `json:"unit"`     // 单位
 }
 
-// BillDetails 账单详情（完整实现）
+// BillDetails 账单详情
 func BillDetails() func(ctx context.Context, c *app.RequestContext) {
 	return func(ctx context.Context, c *app.RequestContext) {
 		klog := slog.FromContext(c)
