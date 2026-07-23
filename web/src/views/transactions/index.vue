@@ -24,7 +24,7 @@
                 <template #amount="{ row }">
                     <span
                         :style="{
-                            color: row.amount > 0 ? 'red' : row.amount < 0 ? 'green' : 'black',
+                            color: row.amount > 0 ? '#f53f3f' : row.amount < 0 ? 'green' : 'black',
                         }">
                         {{ row.amount }}
                     </span>
@@ -38,11 +38,7 @@
                 <template #action="{ row }">
                     <el-button link type="primary" @click="onDetail(row)">详情</el-button>
                     <el-button link type="primary" @click="onUpdate(row)">修改</el-button>
-                    <el-popconfirm class="box-item" :title="`删除：${row.amount}`" placement="left-end" @confirm="onDeleteTransactions(row)">
-                        <template #reference>
-                            <el-button link type="primary">删除</el-button>
-                        </template>
-                    </el-popconfirm>
+                    <el-button link type="primary" @click="onDeleteTransactions(row)">删除</el-button>
                 </template>
             </MyTable>
 
@@ -57,19 +53,23 @@
 </template>
 
 <script>
-import MyTable from "../../components/MyTable/MyTable.vue";
-import { msgcon } from "../../utils/message.js";
-import { GetTransactions, Getcategory, DelTransactions } from "../../api/basic.js";
-import { withDelay, convertToLimitOffset } from "../../utils/common.js";
-import { getCategoryPath } from "../../utils/category.js";
 import { Refresh } from "@element-plus/icons-vue";
-import { formatTime } from "../../utils/date.js";
+import { ElMessageBox } from "element-plus";
+import MyTable from "../../components/MyTable/MyTable.vue";
+import AddTransactions from "./AddTransactions.vue";
 import UpdateTransactions from "./update.vue";
 import TranDetail from "./detail.vue";
+import { GetTransactions, Getcategory, DelTransactions } from "../../api/basic.js";
+import { msgcon } from "../../utils/message.js";
+import { withDelay, convertToLimitOffset } from "../../utils/common.js";
+import { getCategoryPath } from "../../utils/category.js";
+import { formatTime } from "../../utils/date.js";
+
 export default {
     name: "TransactionsIndex",
     components: {
         MyTable,
+        AddTransactions,
         UpdateTransactions,
         TranDetail,
     },
@@ -149,14 +149,25 @@ export default {
             this.$refs.UpdateTransactions.onOpenDialog(val);
         },
         onDeleteTransactions(val) {
-            DelTransactions(val.id)
+            ElMessageBox.confirm(`确定删除这条金额为【${val.amount}】的账单吗？`, "删除确认", {
+                confirmButtonText: "确认删除",
+                cancelButtonText: "取消",
+                type: "warning",
+                draggable: true,
+            })
                 .then(() => {
-                    this.$message.success(msgcon("删除成功"));
-                    this.onRefresh();
+                    DelTransactions(val.id)
+                        .then(() => {
+                            this.$message.success(msgcon("删除成功"));
+                            this.onRefresh();
+                        })
+                        .catch((err) => {
+                            let msg = err.data.metadata.message;
+                            this.$message.error(msgcon("删除失败 " + msg));
+                        });
                 })
-                .catch((err) => {
-                    let msg = err.data.metadata.message;
-                    this.$message.error(msgcon("删除失败 " + msg));
+                .catch(() => {
+                    // 用户取消，无需处理
                 });
         },
     },

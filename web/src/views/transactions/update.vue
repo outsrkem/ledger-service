@@ -2,56 +2,31 @@
     <el-dialog title="修改记账" v-model="dialogVisible" :close-on-click-modal="false" draggable @close="handleDialogClose">
         <div v-loading="loading">
             <el-form :model="formdata" label-width="auto" ref="form" :rules="formRules">
-                <el-row>
+                <el-row :gutter="20">
                     <el-col :span="8">
-                        <el-form-item label="资金流向">
+                        <el-form-item label="金额" prop="amount">
+                            <el-input v-model="formdata.amount" />
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="5">
+                        <el-form-item label="">
                             <el-segmented
                                 v-model="formdata.direction"
                                 :options="[
                                     { value: 2, label: '支出' },
                                     { value: 1, label: '收入' },
-                                ]"
-                                @change="onSwitchCategory" />
+                                ]" />
                         </el-form-item>
                     </el-col>
-                    <el-col :span="16">
+                    <el-col :span="11">
                         <el-form-item label="时间" prop="occ_time">
                             <el-date-picker v-model="formdata.occ_time" type="datetime" value-format="YYYY-MM-DDTHH:mm:ssZZ" />
                         </el-form-item>
                     </el-col>
                 </el-row>
-                <el-form-item label="金额" prop="amount">
-                    <el-input v-model="formdata.amount" />
-                </el-form-item>
+
                 <el-form-item label="分类" prop="category">
-                    <div class="category-container">
-                        <div class="category-wrapper">
-                            <div v-for="(row, rowIndex) in categorizedCategories" :key="rowIndex" class="category-row">
-                                <el-segmented
-                                    v-model="formdata.category"
-                                    :options="row"
-                                    @change="(val) => onChangeCategory(val, rowIndex)"
-                                    class="category-segment">
-                                    <template #default="scope">
-                                        <div class="segment-item">
-                                            {{ scope.item.name }}
-                                        </div>
-                                    </template>
-                                </el-segmented>
-                                <el-segmented
-                                    v-if="formdata.category && activeRowIndex === rowIndex"
-                                    v-model="formdata.subcategory"
-                                    :options="subcategory"
-                                    class="subcategory-segment">
-                                    <template #default="scope">
-                                        <div class="segment-item">
-                                            {{ scope.item.name }}
-                                        </div>
-                                    </template>
-                                </el-segmented>
-                            </div>
-                        </div>
-                    </div>
+                    <TreeCategorySelect ref="treeCat" v-model="formdata.category" :direction="formdata.direction" />
                 </el-form-item>
 
                 <el-form-item label=" ">
@@ -91,22 +66,24 @@
 </template>
 
 <script>
-import dayjs from "dayjs";
-import { msgcon } from "../../utils/message.js";
-import { Getcategory, GetTranDetails, EditTransactions } from "../../api/basic.js";
 import { Plus, Remove } from "@element-plus/icons-vue";
+import dayjs from "dayjs";
+import TreeCategorySelect from "./TreeCategorySelect.vue";
+import { GetTranDetails, EditTransactions } from "../../api/basic.js";
+import { msgcon } from "../../utils/message.js";
+import { withDelay } from "../../utils/common.js";
 
 const DEFAULT_TRAN_FORM = {
     direction: 2,
     occ_time: "",
     amount: "",
-    category: "",
-    subcategory: "",
+    category: null,
     remark: "",
 };
 
 export default {
     name: "UpdateTransactions",
+    components: { TreeCategorySelect },
     props: {
         vdata: {
             type: Object,
@@ -125,11 +102,8 @@ export default {
             loading: false,
             formdata: { ...DEFAULT_TRAN_FORM },
             detailRows: [],
-            category: [],
-            subcategory: [],
-            activeRowIndex: -1,
             tranId: null,
-            // 和新增页面保持一致校验规则
+            targetCidCache: null, // 缓存需要回显的分类id
             formRules: {
                 occ_time: [{ required: true, type: "string", message: "请选择时间", trigger: ["blur", "change"] }],
                 amount: [
@@ -141,14 +115,6 @@ export default {
         };
     },
     computed: {
-        categorizedCategories() {
-            const rowmax = 12;
-            const rows = [];
-            for (let i = 0; i < this.category.length; i += rowmax) {
-                rows.push(this.category.slice(i, i + rowmax));
-            }
-            return rows;
-        },
         totalAmount() {
             return this.detailRows.reduce((sum, row) => {
                 return sum + (Number(row.total) || 0);
@@ -156,11 +122,11 @@ export default {
         },
     },
     methods: {
-        // 打开弹窗入口
         async onOpenDialog(val) {
             this.formdata = { ...DEFAULT_TRAN_FORM };
             this.detailRows = [];
             this.tranId = val.id;
+            this.targetCidCache = null;
             this.dialogVisible = true;
             this.loading = true;
             try {
@@ -172,7 +138,6 @@ export default {
         onCloseDialog() {
             this.dialogVisible = false;
         },
-        // 弹窗关闭回调，清除校验红框 + 重置loading
         handleDialogClose() {
             this.loading = false;
             this.$nextTick(() => {
@@ -181,12 +146,10 @@ export default {
                 }
             });
         },
-        // 获取账单详情 + 分类回显核心逻辑
         async GetDetails() {
-            const res = await GetTranDetails(this.tranId);
+            const res = await withDelay(() => GetTranDetails(this.tranId));
             const payload = res.payload || {};
 
-            // 金额正负处理
             const rawAmount = Number(payload.amount);
             this.formdata.direction = rawAmount >= 0 ? 1 : 2;
             this.formdata.amount = Math.abs(rawAmount).toString();
@@ -195,72 +158,33 @@ export default {
             this.formdata.remark = payload.remark || "";
             this.detailRows = payload.detail ? [...payload.detail] : [];
 
-            const targetCid = payload.cid;
-            // 先加载对应流向分类
-            await this.loadGetCategory(this.formdata.direction);
+            // 缓存cid，**不直接赋值**，等组件加载完毕再赋值
+            this.targetCidCache = payload.cid;
+            this.formdata.category = null;
 
-            // 递归查找cid，区分是父分类还是子分类
-            const findCidInfo = (items) => {
-                for (let i = 0; i < items.length; i++) {
-                    const item = items[i];
-                    if (item.id === targetCid) {
-                        // 匹配到父分类
-                        return {
-                            type: "parent",
-                            id: item.id,
-                            rowIndex: this.getCategoryRowIndex(item.id),
-                        };
-                    }
-                    if (item.children && item.children.length) {
-                        const childItem = item.children.find((c) => c.id === targetCid);
-                        if (childItem) {
-                            const rowIdx = this.getCategoryRowIndex(item.id);
-                            return {
-                                type: "child",
-                                parentId: item.id,
-                                childId: childItem.id,
-                                rowIndex: rowIdx,
-                            };
-                        }
-                        const res = findCidInfo(item.children);
-                        if (res) return res;
-                    }
-                }
-                return null;
-            };
-
-            const cidInfo = findCidInfo(this.category);
-            if (cidInfo) {
-                this.activeRowIndex = cidInfo.rowIndex;
-                if (cidInfo.type === "parent") {
-                    this.formdata.category = cidInfo.id;
-                } else {
-                    this.formdata.category = cidInfo.parentId;
-                    this.$nextTick(() => {
-                        this.subcategory = this.getChildrenWithValue(this.category, cidInfo.parentId);
-                        this.formdata.subcategory = cidInfo.childId;
-                    });
-                }
-            }
+            // 等待组件挂载+分类加载完成，执行回显
+            this.$nextTick(async () => {
+                if (!this.$refs.treeCat) return;
+                // 等待组件内部分类请求完成
+                await this.$refs.treeCat.loadCategory();
+                // 赋值触发匹配
+                this.formdata.category = this.targetCidCache;
+            });
         },
-        // 根据父分类id，找到属于第几行（用于activeRowIndex）
-        getCategoryRowIndex(parentId) {
-            for (let r = 0; r < this.categorizedCategories.length; r++) {
-                const rowItems = this.categorizedCategories[r];
-                if (rowItems.some((item) => item.id === parentId)) {
-                    return r;
-                }
-            }
-            return -1;
+        onSwitchDirection() {
+            this.formdata.category = null;
+            this.targetCidCache = null;
         },
-
-        // 表单+明细校验（完全对齐新增页面）
         async validateForm() {
             const mainFormValid = await new Promise((resolve) => {
                 this.$refs["form"].validate((valid) => {
                     resolve(valid);
                 });
             });
+            if (mainFormValid && !this.formdata.category) {
+                this.$message.error("请选择类别");
+                return false;
+            }
             if (this.detailRows.length > 0) {
                 for (let i = 0; i < this.detailRows.length; i++) {
                     const row = this.detailRows[i];
@@ -284,12 +208,16 @@ export default {
             }
             return mainFormValid;
         },
-
         async onSubmit() {
             const valid = await this.validateForm();
             if (!valid) return;
 
-            const cid = this.formdata.subcategory ? this.formdata.subcategory : this.formdata.category;
+            if (!this.formdata.category || !this.formdata.category) {
+                this.$message.error(msgcon("请选择有效的分类"));
+                return;
+            }
+            const cid = this.formdata.category;
+
             let amount = Number(this.formdata.amount);
             if (this.formdata.direction === 2) {
                 amount = amount * -1;
@@ -303,7 +231,6 @@ export default {
                 unit: row.unit,
             }));
 
-            // body不再携带id
             const data = {
                 cid: cid,
                 occ_time: this.formdata.occ_time,
@@ -312,7 +239,6 @@ export default {
                 detail: formattedDetails,
             };
 
-            // 第一个参数传tranId，第二个传表单数据
             EditTransactions(this.tranId, data)
                 .then(() => {
                     this.$message.success(msgcon("修改成功"));
@@ -324,50 +250,6 @@ export default {
                     this.$message.error(msgcon("修改失败 " + msg));
                 });
         },
-
-        onSwitchCategory(val) {
-            this.loadGetCategory(val);
-            this.formdata.category = "";
-            this.formdata.subcategory = "";
-            this.subcategory = this.getChildrenWithValue(this.category, val);
-            this.activeRowIndex = -1;
-        },
-
-        loadGetCategory: async function (direction = 2) {
-            const res = await Getcategory({ direction: direction });
-            this.category = res.payload.items;
-            this.category.map((item) => {
-                item.value = item.id;
-            });
-        },
-
-        getChildrenWithValue(data, targetId) {
-            function findItem(items) {
-                for (const item of items) {
-                    if (item.id === targetId) {
-                        const children = item.children || [];
-                        return children.map((child) => ({
-                            ...child,
-                            value: child.id,
-                        }));
-                    }
-                    if (item.children && item.children.length > 0) {
-                        const result = findItem(item.children);
-                        if (result !== null) return result;
-                    }
-                }
-                return null;
-            }
-            const result = findItem(data);
-            return result !== null ? result : [];
-        },
-
-        onChangeCategory(value, rowIndex) {
-            this.activeRowIndex = rowIndex;
-            this.formdata.subcategory = "";
-            this.subcategory = this.getChildrenWithValue(this.category, value);
-        },
-
         addDetailRow() {
             this.detailRows.push({
                 id: Date.now() + Math.random(),
@@ -378,11 +260,9 @@ export default {
                 unit: "",
             });
         },
-
         removeDetailRow(index) {
             this.detailRows.splice(index, 1);
         },
-
         calculateTotal(index) {
             const row = this.detailRows[index];
             if (row && row.quantity !== null && row.price !== null) {
@@ -392,52 +272,16 @@ export default {
             }
         },
     },
-    // =========重要改动：删除created里自动加载分类========
-    // created() {
-    //     this.loadGetCategory();
-    // },
 };
 </script>
 
 <style scoped lang="less">
-.el-segmented {
-    word-break: break-word;
-    white-space: pre-line;
-}
 .flex {
     display: flex;
     align-items: center;
 }
 .text-center {
     text-align: center;
-}
-
-.category-container {
-    width: 100%;
-}
-
-.category-wrapper {
-    width: 100%;
-}
-
-.category-row {
-    margin-bottom: 2px;
-}
-
-.category-segment {
-    margin-bottom: 4px;
-}
-
-.subcategory-segment {
-    width: 100%;
-    animation: fadeIn 0.2s ease-in-out;
-}
-
-.segment-item {
-    height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .detail-top-container {
@@ -459,16 +303,5 @@ export default {
     color: #1890ff;
     border-top: 1px solid #e8e8e8;
     padding-top: 8px;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-5px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 </style>
