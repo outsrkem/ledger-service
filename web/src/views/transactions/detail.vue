@@ -134,12 +134,12 @@ export default {
     .income-text {
         font-size: 30px;
         font-weight: bold;
-        color: #00b42a;
+        color: #f53f3f;
     }
     .expense-text {
         font-size: 30px;
         font-weight: bold;
-        color: #f53f3f;
+        color: #00b42a;
     }
 }
 
