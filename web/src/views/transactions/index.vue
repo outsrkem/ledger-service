@@ -65,6 +65,8 @@ import { withDelay, convertToLimitOffset } from "../../utils/common.js";
 import { getCategoryPath } from "../../utils/category.js";
 import { formatTime } from "../../utils/date.js";
 
+const SK_LEDGER_ALL_CATEGORY = "LEDGER_ALL_CATEGORY";
+
 export default {
     name: "TransactionsIndex",
     components: {
@@ -99,55 +101,101 @@ export default {
         formatDate(time) {
             return formatTime(time);
         },
+
         onSyncsize(s, p) {
             this.pageSize = s;
             this.page = p;
             this.onRefresh();
         },
+
         onCurrentChange(p) {
             this.page = p;
             this.loadGetBill(this.pageSize, p);
         },
+
         onSizeChange(s) {
             this.pageSize = s;
             this.page = 1;
             this.loadGetBill(s, 1);
         },
-        loadGetBill: async function (pageSize, page) {
+
+        async loadGetBill(pageSize, page) {
             this.loading = true;
             const params = convertToLimitOffset(page, pageSize);
-            withDelay(() => GetTransactions(params))
-                .then((res) => {
-                    let resp = res.payload.items || [];
-                    let category = window.localStorage.getItem("category");
-                    resp.map((item) => (item.category_title = getCategoryPath(JSON.parse(category), item.category_id) || "未知分类"));
-                    this.transactions = resp;
-                    this.pageTotal = res.payload.page_info.total || 0;
-                })
-                .finally(() => {
-                    this.loading = false;
+            try {
+                const res = await withDelay(() => GetTransactions(params));
+                const resp = res.payload?.items || [];
+
+                const categoryStr = window.localStorage.getItem(SK_LEDGER_ALL_CATEGORY);
+                let categoryTree = [];
+                try {
+                    categoryTree = categoryStr ? JSON.parse(categoryStr) : [];
+                } catch (e) {
+                    this.$message.error(msgcon("分类数据解析失败：" + e));
+                    categoryTree = [];
+                }
+
+                resp.forEach((item) => {
+                    item.category_title = getCategoryPath(categoryTree, item.category_id) || "未知分类";
                 });
+
+                this.transactions = resp;
+                this.pageTotal = res.payload?.page_info?.total || 0;
+            } catch (err) {
+                this.$message.error(msgcon("账单列表请求异常：" + err));
+            } finally {
+                this.loading = false;
+            }
         },
-        loadGetCategory: async function () {
-            Getcategory({ direction: 2 }).then((res) => {
-                window.localStorage.setItem("category", JSON.stringify(res.payload.items));
-            });
+
+        /**
+         * Load income & expense categories, merge and save to localStorage
+         */
+        async loadGetCategory() {
+            try {
+                const results = await Promise.allSettled([Getcategory({ direction: 1 }), Getcategory({ direction: 2 })]);
+
+                let mergedCategoryList = [];
+                results.forEach((result) => {
+                    if (result.status === "fulfilled") {
+                        const res = result.value;
+                        const rawItems = res.payload?.items;
+                        const safeItems = Array.isArray(rawItems) ? rawItems : [];
+                        mergedCategoryList.push(...safeItems);
+                    } else {
+                        // Only print to console to avoid frequent popup notifications
+                        console.error("Category sub-request failed:", result.reason);
+                        // this.$message.error(msgcon("分类请求异常 " + result.reason));
+                    }
+                });
+
+                window.localStorage.setItem(SK_LEDGER_ALL_CATEGORY, JSON.stringify(mergedCategoryList));
+            } catch (err) {
+                this.$message.error(msgcon("分类加载异常：" + err));
+            }
         },
-        onRefresh() {
+
+        /**
+         * Refresh data. Load categories first to eliminate race condition
+         */
+        async onRefresh() {
             this.loading = true;
-            this.loadGetCategory();
+            // Wait category request finished before loading bills, prevent unknown category display
+            await this.loadGetCategory();
             this.loadGetBill(this.pageSize, this.page);
         },
+
         onAddBill() {
             this.$refs.AddTransactions.onOpenDialog();
         },
-        // 查看详情
+
         onDetail(val) {
             this.$refs.TranDetail.onOpenDialog(val);
         },
         onUpdate(val) {
             this.$refs.UpdateTransactions.onOpenDialog(val);
         },
+
         onDeleteTransactions(val) {
             ElMessageBox.confirm(`确定删除这条金额为【${val.amount}】的账单吗？`, "删除确认", {
                 confirmButtonText: "确认删除",
@@ -155,27 +203,27 @@ export default {
                 type: "warning",
                 draggable: true,
             })
-                .then(() => {
-                    DelTransactions(val.id)
-                        .then(() => {
-                            this.$message.success(msgcon("删除成功"));
-                            this.onRefresh();
-                        })
-                        .catch((err) => {
-                            let msg = err.data.metadata.message;
-                            this.$message.error(msgcon("删除失败 " + msg));
-                        });
+                .then(async () => {
+                    await DelTransactions(val.id);
+                    this.$message.success(msgcon("删除成功"));
+                    this.onRefresh();
                 })
-                .catch(() => {
-                    // 用户取消，无需处理
+                .catch((err) => {
+                    if (err) {
+                        const msg = err.data?.metadata?.message || "未知错误";
+                        this.$message.error(msgcon("删除失败：" + msg));
+                    }
                 });
         },
     },
     created() {
         this.$globalBus.emit("updateActivePath", "/transactions");
-        this.$globalBus.on("onRefresh", () => {
-            this.onRefresh();
-        });
+        this.refreshHandler = () => this.onRefresh();
+        this.$globalBus.on("onRefresh", this.refreshHandler);
+    },
+    beforeUnmount() {
+        // Remove global bus listener to avoid memory leak and duplicate trigger
+        this.$globalBus.off("onRefresh", this.refreshHandler);
     },
 };
 </script>
