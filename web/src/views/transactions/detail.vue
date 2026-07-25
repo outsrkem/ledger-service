@@ -177,11 +177,24 @@ export default {
         margin-bottom: 12px;
     }
     .detail-item {
+        position: relative;
         display: flex;
         justify-content: space-between;
         padding: 8px 0;
-        &:not(:last-child) {
-            border-bottom: 1px dashed #eee;
+
+        &::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 1px;
+            background: transparent;
+            background-image: linear-gradient(to right, #e0e0e0 50%, transparent 50%);
+            background-size: 6px 1px;
+        }
+        &:last-child::after {
+            display: none;
         }
         .item-name {
             color: #333;
